@@ -1,3 +1,5 @@
+import 'package:example/presentation/basic_usage/route.dart';
+import 'package:example/presentation/custom_snapping/route.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,14 +20,14 @@ class _HomePageState extends State<HomePage> {
             leading: Text('1.'),
             title: Text('Basic Usage'),
             onTap: () {
-              // context.go();
+              const BasicUsageRoute().go(context);
             },
           ),
           ListTile(
             leading: Text('2.'),
             title: Text('Custom Snapping'),
             onTap: () {
-              // context.go();
+              const CustomSnappingRoute().go(context);
             },
           ),
           ListTile(
