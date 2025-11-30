@@ -1,19 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sliding_panel_kit/sliding_panel_kit.dart';
 
-void main() {
-  runApp(const SlidingPanelApp());
-}
-
-class SlidingPanelApp extends StatelessWidget {
-  const SlidingPanelApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: SlidingPanelExample());
-  }
-}
-
 class SlidingPanelExample extends StatefulWidget {
   const SlidingPanelExample({super.key});
 
