@@ -168,7 +168,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
         await controller.animateTo(
           snapPoint,
           duration: Duration(milliseconds: (seconds * 1000).round()),
-          curve: Curves.easeOut,
+          curve: Curves.ease,
         );
     }
   }
