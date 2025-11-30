@@ -85,7 +85,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
     super.didUpdateWidget(oldWidget);
 
     final newExtent = widget._extent;
-    final extentChanged = oldWidget._extent != widget._extent;
+    final extentChanged = oldWidget._extent != newExtent;
 
     final sizesChanged = !listEquals(
       oldWidget.snapConfig.sizes,
