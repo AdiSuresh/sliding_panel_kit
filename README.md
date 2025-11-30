@@ -100,6 +100,7 @@ class _SlidingPanelExampleState extends State<SlidingPanelExample>
             builder: (context, handle) {
               return SlidingPanelBody(
                 child: ListView.builder(
+                  itemCount: 25,
                   itemBuilder: (_, i) => ListTile(
                     title: Text('Item ${i + 1}'),
                   ),
@@ -130,6 +131,7 @@ SlidingPanelBuilder(
           if (handle != null) handle,
           Expanded(
             child: ListView.builder(
+              itemCount: 25,
               itemBuilder: (_, i) => ListTile(
                 title: Text('Item ${i + 1}'),
               ),
