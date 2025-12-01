@@ -1,5 +1,5 @@
 name: sliding_panel_kit
-description: "A new Flutter package project."
+description: "A simple and lightweight solution for building sliding-up panel for Flutter with smooth drag gestures, snap-points, and built-in scroll coordination for scrollable content."
 version: 0.0.1
 homepage:
 repository: https://github.com/AdiSuresh/sliding_panel_kit
