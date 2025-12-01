@@ -1,5 +1,6 @@
 import 'package:example/presentation/basic_usage/route.dart';
 import 'package:example/presentation/custom_snapping/route.dart';
+import 'package:example/presentation/parallax_effect/route.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,9 +33,9 @@ class _HomePageState extends State<HomePage> {
           ),
           ListTile(
             leading: Text('3.'),
-            title: Text('Parallax'),
+            title: Text('Parallax Effect'),
             onTap: () {
-              // context.go();
+              const ParallaxEffectRoute().go(context);
             },
           ),
         ],
