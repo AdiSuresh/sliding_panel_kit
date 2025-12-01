@@ -173,11 +173,11 @@ FloatingActionButton(
   },
 )
 ```
-For the complete example, see [`example/basic_usage.dart`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/basic_usage.dart).
+For the complete example, see [`example/basic_usage.dart`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/basic_usage/view.dart).
 
 Here are some other examples:
-- Spring-based snapping
-- Parallax effect
+- [`Spring-based snapping`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/custom_snapping/view.dart)
+- [`Parallax effect`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/parallax_effect/view.dart)
 
 
 ## Future work
