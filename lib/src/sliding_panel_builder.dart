@@ -85,7 +85,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
     super.didUpdateWidget(oldWidget);
 
     final newExtent = widget._extent;
-    final extentChanged = oldWidget._extent != widget._extent;
+    final extentChanged = oldWidget._extent != newExtent;
 
     final sizesChanged = !listEquals(
       oldWidget.snapConfig.sizes,
@@ -168,7 +168,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
         await controller.animateTo(
           snapPoint,
           duration: Duration(milliseconds: (seconds * 1000).round()),
-          curve: Curves.easeOut,
+          curve: Curves.ease,
         );
     }
   }
@@ -190,8 +190,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
 
           case ScrollUpdateNotification(:final dragDetails):
             final position = Scrollable.of(context).position;
-            final value = controller.value;
-            final isSnapPoint = this.isSnapPoint(value);
+            final isSnapPoint = this.isSnapPoint(controller.value);
 
             if (dragDetails == null) {
               scrollAreaTracker.reset();
@@ -206,26 +205,54 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
 
             final ScrollPosition(
               :outOfRange,
+              :axisDirection,
               :pixels,
               :minScrollExtent,
+              :maxScrollExtent,
               :correctBy,
             ) = position;
 
             if (outOfRange) {
-              if (pixels < minScrollExtent) {
-                scrollAreaTracker.reset();
-                correctBy(dy < 0 ? -dy : dy);
-                break;
-              } else if (dy < 0) {
-                scrollAreaTracker.reset();
-                if (!isSnapPoint) {
-                  correctBy(dy);
+              if (!axisDirection.reverse) {
+                if (pixels < minScrollExtent) {
+                  scrollAreaTracker.reset();
+                  correctBy(dy.abs());
+                  break;
+                } else if (dy < 0) {
+                  scrollAreaTracker.reset();
+                  if (!isSnapPoint) {
+                    correctBy(dy);
+                  }
+                  break;
+                } else if (pixels - dy < maxScrollExtent) {
+                  scrollAreaTracker.reset();
+                  break;
                 }
-                break;
+              } else {
+                if (pixels > maxScrollExtent) {
+                  scrollAreaTracker.reset();
+                  if (!isSnapPoint && dy > 0) {
+                    correctBy(-dy);
+                  }
+                  break;
+                } else if (dy < 0) {
+                  scrollAreaTracker.reset();
+                  if (!isSnapPoint) {
+                    correctBy(-dy);
+                  }
+                  break;
+                } else if (pixels + dy > minScrollExtent) {
+                  scrollAreaTracker.reset();
+                  break;
+                }
               }
             } else if (!isSnapPoint) {
               scrollAreaTracker.reset();
-              correctBy(dy);
+              if (!axisDirection.reverse) {
+                correctBy(dy);
+              } else {
+                correctBy(-dy);
+              }
               break;
             }
 
@@ -275,12 +302,9 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
 
                 return Transform.translate(
                   offset: Offset(0, dy),
-                  child: Align(
-                    alignment: .bottomCenter,
-                    child: ConstrainedBox(
-                      constraints: constraints.copyWith(maxHeight: maxHeight),
-                      child: child,
-                    ),
+                  child: ConstrainedBox(
+                    constraints: constraints.copyWith(maxHeight: maxHeight),
+                    child: child,
                   ),
                 );
               },
@@ -300,6 +324,15 @@ extension on BuildContext {
     final size = renderObject.size;
 
     return Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+  }
+}
+
+extension on AxisDirection {
+  bool get reverse {
+    if (this case .up || .left) {
+      return true;
+    }
+    return false;
   }
 }
 

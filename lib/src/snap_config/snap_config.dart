@@ -1,12 +1,6 @@
 import 'dart:collection';
-
-// ignore: depend_on_referenced_packages
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter/physics.dart';
 
-part 'snap_config.g.dart';
-
-@CopyWith()
 final class SlidingPanelSnapConfig {
   final List<double> _sizes;
   final (double lower, double upper) velocityRange;
@@ -27,4 +21,16 @@ final class SlidingPanelSnapConfig {
          final (lower, upper) = velocityRange;
          return lower > 0 && upper > 0 && lower < upper;
        }(), 'Invalid snap velocity range was specified.');
+
+  SlidingPanelSnapConfig copyWith({
+    List<double>? sizes,
+    (double lower, double upper)? velocityRange,
+    SpringDescription? springDescription,
+  }) {
+    return SlidingPanelSnapConfig(
+      sizes: sizes ?? _sizes,
+      velocityRange: velocityRange ?? this.velocityRange,
+      springDescription: springDescription ?? this.springDescription,
+    );
+  }
 }
