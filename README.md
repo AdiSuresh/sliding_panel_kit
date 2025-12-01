@@ -173,7 +173,7 @@ FloatingActionButton(
   },
 )
 ```
-For the complete example, see [`example/basic_usage.dart`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/basic_usage/view.dart).
+For the complete example, see [`basic_usage/view.dart`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/basic_usage/view.dart).
 
 Here are some other examples:
 - [`Spring-based snapping`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/custom_snapping/view.dart)
@@ -193,7 +193,3 @@ If you run into issues or have ideas for improvements, please file an issue on G
 https://github.com/AdiSuresh/sliding_panel_kit/issues
 
 Contributions are welcome! If you’d like to improve the package, feel free to submit a pull request.
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
