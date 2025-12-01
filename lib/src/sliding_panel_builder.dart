@@ -269,7 +269,6 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
         return false;
       },
       child: Listener(
-        behavior: .opaque,
         onPointerDown: (event) {
           velocityTracker = VelocityTracker.withKind(event.kind);
           drag(event.delta.dy);
@@ -303,12 +302,9 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
 
                 return Transform.translate(
                   offset: Offset(0, dy),
-                  child: Align(
-                    alignment: .bottomCenter,
-                    child: ConstrainedBox(
-                      constraints: constraints.copyWith(maxHeight: maxHeight),
-                      child: child,
-                    ),
+                  child: ConstrainedBox(
+                    constraints: constraints.copyWith(maxHeight: maxHeight),
+                    child: child,
                   ),
                 );
               },
