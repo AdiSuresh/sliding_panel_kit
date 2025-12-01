@@ -2,6 +2,7 @@ name: sliding_panel_kit
 description: "A new Flutter package project."
 version: 0.0.1
 homepage:
+repository: https://github.com/AdiSuresh/sliding_panel_kit
 
 environment:
   sdk: ^3.10.0
