@@ -357,18 +357,15 @@ final class _ScrollAreaTracker {
 }
 
 final class SlidingPanelController extends ValueNotifier<double> {
-  final double initialExtent;
   final AnimationController _animationController;
 
   bool _attached = false;
   SlidingPanelExtent _extent = const SlidingPanelExtent();
   double? _availablePixels;
 
-  SlidingPanelController({
-    this.initialExtent = 0.0,
-    required TickerProvider vsync,
-  }) : _animationController = AnimationController(vsync: vsync),
-       super(initialExtent);
+  SlidingPanelController({required TickerProvider vsync})
+    : _animationController = AnimationController(vsync: vsync),
+      super(0.0);
 
   double get availablePixels => _availablePixels!;
 
