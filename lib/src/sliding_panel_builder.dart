@@ -29,7 +29,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
          'Minimum extent must be between 0.0 and 1.0 inclusive.',
        ),
        assert(
-         maxExtent >= 0 && minExtent <= 1,
+         maxExtent >= 0 && maxExtent <= 1,
          'Maximum extent must be between 0.0 and 1.0 inclusive.',
        ),
        assert(
