@@ -26,7 +26,6 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample>
 
   @override
   Widget build(BuildContext context) {
-    ValueListenableBuilder;
     return Scaffold(
       body: Stack(
         children: [
