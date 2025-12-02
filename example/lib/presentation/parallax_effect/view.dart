@@ -34,22 +34,26 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample>
             animation: panelCtrl,
             builder: (context, child) {
               final progress = panelCtrl.normalizedValue;
-              final offset = progress * 48;
+              const pixels = 16;
+              final offset = progress * pixels;
 
               return Positioned.fill(
                 child: Transform.translate(
-                  offset: Offset(0, -offset),
+                  offset: Offset(0, offset),
                   child: child,
                 ),
               );
             },
-            child: Image.asset('assets/mountain.jpg', fit: BoxFit.cover),
+            child: Transform.scale(
+              scale: 1.25,
+              child: Image.asset('assets/mountain.jpg', fit: BoxFit.cover),
+            ),
           ),
           AnimatedBuilder(
             animation: panelCtrl,
             builder: (context, child) {
               final progress = panelCtrl.normalizedValue;
-              final offset = progress * 96;
+              final offset = progress * 64;
 
               return Transform.translate(
                 offset: Offset(0, -offset),
