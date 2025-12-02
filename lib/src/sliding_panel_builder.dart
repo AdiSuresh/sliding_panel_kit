@@ -397,15 +397,15 @@ final class SlidingPanelController extends ValueNotifier<double> {
     super.dispose();
   }
 
-  void jumpTo(double size) {
+  void jumpTo(double extent) {
     if (_animationController.isAnimating) {
       _animationController.stop();
     }
-    value = size;
+    value = extent;
   }
 
   Future<void> animateTo(
-    double size, {
+    double extent, {
     required Duration duration,
     required Curve curve,
   }) async {
@@ -418,7 +418,7 @@ final class SlidingPanelController extends ValueNotifier<double> {
 
     try {
       await _animationController.animateTo(
-        size,
+        extent,
         duration: duration,
         curve: curve,
       );
