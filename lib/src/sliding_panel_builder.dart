@@ -8,8 +8,8 @@ import 'package:sliding_panel_kit/src/snap_config/snap_config.dart';
 
 final class SlidingPanelBuilder extends StatefulWidget {
   final SlidingPanelController controller;
-  final double minSize;
-  final double maxSize;
+  final double minExtent;
+  final double maxExtent;
   final SlidingPanelSnapConfig snapConfig;
   final PreferredSizeWidget? handle;
   final Widget Function(BuildContext context, Widget? handle) builder;
@@ -19,24 +19,24 @@ final class SlidingPanelBuilder extends StatefulWidget {
   SlidingPanelBuilder({
     super.key,
     required this.controller,
-    this.minSize = 0.0,
-    this.maxSize = 1.0,
+    this.minExtent = 0.0,
+    this.maxExtent = 1.0,
     SlidingPanelSnapConfig? snapConfig,
     this.handle,
     required this.builder,
   }) : assert(
-         minSize >= 0 && minSize <= 1,
+         minExtent >= 0 && minExtent <= 1,
          'Minimum size must be between 0.0 and 1.0 inclusive.',
        ),
        assert(
-         maxSize >= 0 && minSize <= 1,
+         maxExtent >= 0 && minExtent <= 1,
          'Maximum size must be between 0.0 and 1.0 inclusive.',
        ),
        assert(
-         minSize <= maxSize,
+         minExtent <= maxExtent,
          'Minimum size cannot be greater than maximum size.',
        ),
-       snapConfig = _processSnapPointsArg(snapConfig, minSize, maxSize),
+       snapConfig = _processSnapPointsArg(snapConfig, minExtent, maxExtent),
        _handleHeight = handle?.preferredSize.height ?? 0.0;
 
   static SlidingPanelSnapConfig _processSnapPointsArg(
@@ -57,7 +57,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
   }
 
   SlidingPanelExtent get _extent {
-    return SlidingPanelExtent(minSize: minSize, maxSize: maxSize);
+    return SlidingPanelExtent(minSize: minExtent, maxSize: maxExtent);
   }
 
   @override
@@ -103,7 +103,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
     if (pixels case 0) {
       return;
     }
-    controller.jumpTo(controller.value - dy * widget.maxSize / pixels);
+    controller.jumpTo(controller.value - dy * widget.maxExtent / pixels);
   }
 
   double findSnapPoint(double current) {
@@ -125,7 +125,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
     final velocity = this.velocity;
     final index = findSnapPointIndex(size);
 
-    final SlidingPanelBuilder(:minSize, :maxSize) = widget;
+    final SlidingPanelBuilder(minExtent: minSize, maxExtent: maxSize) = widget;
 
     final SlidingPanelSnapConfig(
       sizes: snapSizes,
@@ -293,8 +293,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
 
                 controller._availablePixels = availablePixels;
 
-                final maxHeight = availablePixels * widget.maxSize;
-                final minHeight = availablePixels * widget.minSize;
+                final maxHeight = availablePixels * widget.maxExtent;
+                final minHeight = availablePixels * widget.minExtent;
 
                 final travel = (maxHeight - minHeight) - widget._handleHeight;
 
