@@ -1,8 +1,8 @@
 final class SlidingPanelExtent {
-  final double minSize;
-  final double maxSize;
+  final double minExtent;
+  final double maxExtent;
 
-  const SlidingPanelExtent({this.minSize = 0.0, this.maxSize = 1.0});
+  const SlidingPanelExtent({this.minExtent = 0.0, this.maxExtent = 1.0});
 
   @override
   bool operator ==(Object other) {
@@ -10,10 +10,10 @@ final class SlidingPanelExtent {
       return true;
     }
     return other is SlidingPanelExtent &&
-        other.minSize == minSize &&
-        other.maxSize == maxSize;
+        other.minExtent == minExtent &&
+        other.maxExtent == maxExtent;
   }
 
   @override
-  int get hashCode => Object.hash(minSize, maxSize);
+  int get hashCode => Object.hash(minExtent, maxExtent);
 }

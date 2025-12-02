@@ -57,7 +57,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
   }
 
   SlidingPanelExtent get _extent {
-    return SlidingPanelExtent(minSize: minExtent, maxSize: maxExtent);
+    return SlidingPanelExtent(minExtent: minExtent, maxExtent: maxExtent);
   }
 
   @override
@@ -357,7 +357,7 @@ final class _ScrollAreaTracker {
 }
 
 final class SlidingPanelController extends ValueNotifier<double> {
-  final double initialSize;
+  final double initialExtent;
   final AnimationController _animationController;
 
   bool _attached = false;
@@ -365,29 +365,29 @@ final class SlidingPanelController extends ValueNotifier<double> {
   double? _availablePixels;
 
   SlidingPanelController({
-    this.initialSize = 0.0,
+    this.initialExtent = 0.0,
     required TickerProvider vsync,
   }) : _animationController = AnimationController(vsync: vsync),
-       super(initialSize);
+       super(initialExtent);
 
   double get availablePixels => _availablePixels!;
 
   double get pixels => value * availablePixels;
 
-  double get maxPixels => _extent.maxSize * availablePixels;
+  double get maxPixels => _extent.maxExtent * availablePixels;
 
   @override
   @protected
   set value(double value) {
-    super.value = value.clamp(_extent.minSize, _extent.maxSize);
+    super.value = value.clamp(_extent.minExtent, _extent.maxExtent);
   }
 
   double get normalizedValue {
-    final range = _extent.maxSize - _extent.minSize;
+    final range = _extent.maxExtent - _extent.minExtent;
     if (range == 0) {
       return 0;
     }
-    return (value - _extent.minSize) / range;
+    return (value - _extent.minExtent) / range;
   }
 
   @override
