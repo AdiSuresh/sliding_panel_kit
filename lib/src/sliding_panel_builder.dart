@@ -41,18 +41,18 @@ final class SlidingPanelBuilder extends StatefulWidget {
 
   static SlidingPanelSnapConfig _processSnapPointsArg(
     SlidingPanelSnapConfig? snapConfig,
-    double minSize,
-    double maxSize,
+    double minExtent,
+    double maxExtent,
   ) {
-    final sizes = {minSize, maxSize, ...?snapConfig?.sizes}.toList();
+    final extents = {minExtent, maxExtent, ...?snapConfig?.extents}.toList();
     assert(
-      sizes.every((e) => e >= minSize && e <= maxSize),
-      'All snapSizes must be between minSize and maxSize inclusive.',
+      extents.every((e) => e >= minExtent && e <= maxExtent),
+      'All snap points must be between $minExtent and $maxExtent inclusive.',
     );
-    sizes.sort();
+    extents.sort();
     return switch (snapConfig) {
-      null => SlidingPanelSnapConfig(sizes: sizes),
-      _ => snapConfig.copyWith(sizes: sizes),
+      null => SlidingPanelSnapConfig(extents: extents),
+      _ => snapConfig.copyWith(extents: extents),
     };
   }
 
@@ -87,12 +87,12 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
     final newExtent = widget._extent;
     final extentChanged = oldWidget._extent != newExtent;
 
-    final sizesChanged = !listEquals(
-      oldWidget.snapConfig.sizes,
-      widget.snapConfig.sizes,
+    final snapPointsChanged = !listEquals(
+      oldWidget.snapConfig.extents,
+      widget.snapConfig.extents,
     );
 
-    if (extentChanged || sizesChanged) {
+    if (extentChanged || snapPointsChanged) {
       controller._extent = newExtent;
       snap();
     }
@@ -107,13 +107,13 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
   }
 
   double findSnapPoint(double current) {
-    return widget.snapConfig.sizes.reduce(
+    return widget.snapConfig.extents.reduce(
       (a, b) => (current - a).abs() < (current - b).abs() ? a : b,
     );
   }
 
   int findSnapPointIndex(double current) {
-    return widget.snapConfig.sizes.indexOf(findSnapPoint(current));
+    return widget.snapConfig.extents.indexOf(findSnapPoint(current));
   }
 
   bool isSnapPoint(double current) {
@@ -128,7 +128,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
     final SlidingPanelBuilder(minExtent: minSize, maxExtent: maxSize) = widget;
 
     final SlidingPanelSnapConfig(
-      sizes: snapSizes,
+      extents: snapSizes,
       velocityRange: (lower, upper),
       :springDescription,
     ) = widget.snapConfig;

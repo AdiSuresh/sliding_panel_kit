@@ -33,7 +33,7 @@ class _BasicUsageExampleState extends State<BasicUsageExample>
             // Content behind the panel
             SlidingPanelBuilder(
               controller: controller,
-              snapConfig: SlidingPanelSnapConfig(sizes: [0.75]),
+              snapConfig: SlidingPanelSnapConfig(extents: [0.75]),
               handle: const SlidingPanelHandle(),
               builder: (context, handle) {
                 return SlidingPanelBody(

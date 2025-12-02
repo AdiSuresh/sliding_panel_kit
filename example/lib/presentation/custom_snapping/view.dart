@@ -34,7 +34,7 @@ class _CustomSnappingExampleState extends State<CustomSnappingExample>
             SlidingPanelBuilder(
               controller: controller,
               snapConfig: SlidingPanelSnapConfig(
-                sizes: [0.75],
+                extents: [0.75],
                 velocityRange: (400, 2400),
                 springDescription: SpringDescription(
                   mass: 1.2,

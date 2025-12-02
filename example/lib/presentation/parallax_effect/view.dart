@@ -82,7 +82,7 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample>
             child: SlidingPanelBuilder(
               controller: panelCtrl,
               snapConfig: SlidingPanelSnapConfig(
-                sizes: [0.75],
+                extents: [0.75],
                 springDescription: SpringDescription(
                   mass: 1.2,
                   stiffness: 300,
