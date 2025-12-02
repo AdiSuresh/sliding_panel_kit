@@ -26,15 +26,15 @@ final class SlidingPanelBuilder extends StatefulWidget {
     required this.builder,
   }) : assert(
          minExtent >= 0 && minExtent <= 1,
-         'Minimum size must be between 0.0 and 1.0 inclusive.',
+         'Minimum extent must be between 0.0 and 1.0 inclusive.',
        ),
        assert(
          maxExtent >= 0 && minExtent <= 1,
-         'Maximum size must be between 0.0 and 1.0 inclusive.',
+         'Maximum extent must be between 0.0 and 1.0 inclusive.',
        ),
        assert(
          minExtent <= maxExtent,
-         'Minimum size cannot be greater than maximum size.',
+         'Minimum extent cannot be greater than maximum extent.',
        ),
        snapConfig = _processSnapPointsArg(snapConfig, minExtent, maxExtent),
        _handleHeight = handle?.preferredSize.height ?? 0.0;
