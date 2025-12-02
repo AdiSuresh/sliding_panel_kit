@@ -383,7 +383,7 @@ final class SlidingPanelController extends ValueNotifier<double> {
   }
 
   double get normalizedValue {
-    final range = _extent.maxExtent - _extent.minExtent;
+    final range = _extent.range;
     if (range == 0) {
       return 0;
     }

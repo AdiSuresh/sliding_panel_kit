@@ -16,4 +16,6 @@ final class SlidingPanelExtent {
 
   @override
   int get hashCode => Object.hash(minExtent, maxExtent);
+
+  double get range => maxExtent - minExtent;
 }
