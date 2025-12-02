@@ -10,6 +10,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
   final SlidingPanelController controller;
   final double minExtent;
   final double maxExtent;
+  final double initialExtent;
   final SlidingPanelSnapConfig snapConfig;
   final PreferredSizeWidget? handle;
   final Widget Function(BuildContext context, Widget? handle) builder;
@@ -21,6 +22,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
     required this.controller,
     this.minExtent = 0.0,
     this.maxExtent = 1.0,
+    double? initialExtent,
     SlidingPanelSnapConfig? snapConfig,
     this.handle,
     required this.builder,
@@ -36,6 +38,14 @@ final class SlidingPanelBuilder extends StatefulWidget {
          minExtent <= maxExtent,
          'Minimum extent cannot be greater than maximum extent.',
        ),
+       assert(
+         switch (initialExtent) {
+           null => true,
+           final value => value >= minExtent && value <= maxExtent,
+         },
+         'Initial extent must be between $minExtent and $maxExtent inclusive.',
+       ),
+       initialExtent = initialExtent ?? minExtent,
        snapConfig = _processSnapPointsArg(snapConfig, minExtent, maxExtent),
        _handleHeight = handle?.preferredSize.height ?? 0.0;
 
@@ -78,6 +88,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
   void initState() {
     super.initState();
     controller._extent = widget._extent;
+    controller.value = widget.initialExtent;
   }
 
   @override
