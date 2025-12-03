@@ -7,7 +7,7 @@ import 'package:sliding_panel_kit/src/extent/extent.dart';
 import 'package:sliding_panel_kit/src/snap_config/snap_config.dart';
 
 final class SlidingPanelBuilder extends StatefulWidget {
-  final SlidingPanelController controller;
+  final SlidingPanelController? controller;
   final double minExtent;
   final double maxExtent;
   final double initialExtent;
@@ -19,7 +19,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
 
   SlidingPanelBuilder({
     super.key,
-    required this.controller,
+    this.controller,
     this.minExtent = 0.0,
     this.maxExtent = 1.0,
     double? initialExtent,
@@ -74,19 +74,27 @@ final class SlidingPanelBuilder extends StatefulWidget {
   State<SlidingPanelBuilder> createState() => _SlidingPanelBuilderState();
 }
 
-final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
+final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
+    with SingleTickerProviderStateMixin {
+  SlidingPanelController? _controller;
+
   final scrollAreaTracker = _ScrollAreaTracker();
   VelocityTracker? velocityTracker;
+
+  SlidingPanelController get controller {
+    return widget.controller ?? _controller!;
+  }
 
   double get velocity {
     return velocityTracker?.getVelocity().pixelsPerSecond.dy ?? 0;
   }
 
-  SlidingPanelController get controller => widget.controller;
-
   @override
   void initState() {
     super.initState();
+    if (widget.controller == null) {
+      _controller = SlidingPanelController(vsync: this);
+    }
     controller._extent = widget._extent;
     controller.value = widget.initialExtent;
   }
@@ -94,6 +102,17 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
   @override
   void didUpdateWidget(covariant SlidingPanelBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    final providedController = widget.controller;
+
+    if (providedController == null) {
+      _controller ??= SlidingPanelController(vsync: this);
+      if (oldWidget.controller case SlidingPanelController(:final value)) {
+        _controller?.value = value;
+      }
+    } else if (_controller case SlidingPanelController(:final value)) {
+      providedController.value = value;
+    }
 
     final newExtent = widget._extent;
     final extentChanged = oldWidget._extent != newExtent;
@@ -107,6 +126,12 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
       controller._extent = newExtent;
       snap();
     }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
   }
 
   void drag(double dy) {
