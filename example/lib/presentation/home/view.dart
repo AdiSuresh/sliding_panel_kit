@@ -1,5 +1,5 @@
 import 'package:example/presentation/basic_usage/route.dart';
-import 'package:example/presentation/custom_snapping/route.dart';
+import 'package:example/presentation/custom_usage/route.dart';
 import 'package:example/presentation/parallax_effect/route.dart';
 import 'package:flutter/material.dart';
 
@@ -26,9 +26,9 @@ class _HomePageState extends State<HomePage> {
           ),
           ListTile(
             leading: Text('2.'),
-            title: Text('Custom Snapping'),
+            title: Text('Custom Usage'),
             onTap: () {
-              const CustomSnappingRoute().go(context);
+              const CustomUsageRoute().go(context);
             },
           ),
           ListTile(

@@ -1,5 +1,5 @@
 import 'package:example/presentation/basic_usage/route.dart';
-import 'package:example/presentation/custom_snapping/route.dart';
+import 'package:example/presentation/custom_usage/route.dart';
 import 'package:example/presentation/home/view.dart';
 import 'package:example/presentation/parallax_effect/route.dart';
 import 'package:flutter/widgets.dart';
@@ -11,7 +11,7 @@ part 'route.g.dart';
   path: '/',
   routes: [
     TypedGoRoute<BasicUsageRoute>(path: '/basic-usage'),
-    TypedGoRoute<CustomSnappingRoute>(path: '/custom-snapping'),
+    TypedGoRoute<CustomUsageRoute>(path: '/custom-usage'),
     TypedGoRoute<ParallaxEffectRoute>(path: '/parallax-effect'),
   ],
 )
