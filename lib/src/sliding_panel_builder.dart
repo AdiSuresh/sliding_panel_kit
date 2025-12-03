@@ -157,31 +157,31 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
   }
 
   Future<void> snap() async {
-    final size = controller.value;
+    final extent = controller.value;
     final velocity = this.velocity;
-    final index = findSnapPointIndex(size);
+    final index = findSnapPointIndex(extent);
 
-    final SlidingPanelBuilder(minExtent: minSize, maxExtent: maxSize) = widget;
+    final SlidingPanelBuilder(:minExtent, :maxExtent) = widget;
 
     final SlidingPanelSnapConfig(
-      extents: snapSizes,
+      extents: snapPoints,
       velocityRange: (lower, upper),
       :springDescription,
     ) = widget.snapConfig;
 
-    var snapPoint = snapSizes[index];
+    var snapPoint = snapPoints[index];
 
     if (velocity < -upper) {
-      snapPoint = maxSize;
+      snapPoint = maxExtent;
     } else if (velocity < -lower) {
-      snapPoint = snapSizes[(index + 1).clamp(0, snapSizes.length - 1)];
+      snapPoint = snapPoints[(index + 1).clamp(0, snapPoints.length - 1)];
     } else if (velocity > upper) {
-      snapPoint = minSize;
+      snapPoint = minExtent;
     } else if (velocity > lower) {
-      snapPoint = snapSizes[(index - 1).clamp(0, snapSizes.length - 1)];
+      snapPoint = snapPoints[(index - 1).clamp(0, snapPoints.length - 1)];
     }
 
-    final snapToEdge = snapPoint == minSize || snapPoint == maxSize;
+    final snapToEdge = snapPoint == minExtent || snapPoint == maxExtent;
 
     switch (springDescription) {
       case != null when !snapToEdge:
@@ -189,7 +189,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         await controller.animateWith(
           SpringSimulation(
             springDescription,
-            size,
+            extent,
             snapPoint,
             speed / 5000,
             snapToEnd: true,
@@ -198,7 +198,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         controller.jumpTo(snapPoint);
 
       case _:
-        final pixels = (size - snapPoint).abs() * controller.availablePixels;
+        final pixels = (extent - snapPoint).abs() * controller.availablePixels;
         final speed = velocity.abs().clamp(1000, 5000);
         final seconds = pixels / speed;
         await controller.animateTo(
