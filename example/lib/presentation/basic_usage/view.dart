@@ -8,15 +8,8 @@ class BasicUsageExample extends StatefulWidget {
   State<BasicUsageExample> createState() => _BasicUsageExampleState();
 }
 
-class _BasicUsageExampleState extends State<BasicUsageExample>
-    with TickerProviderStateMixin {
-  late final SlidingPanelController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = SlidingPanelController(vsync: this);
-  }
+class _BasicUsageExampleState extends State<BasicUsageExample> {
+  final controller = SlidingPanelController();
 
   @override
   void dispose() {

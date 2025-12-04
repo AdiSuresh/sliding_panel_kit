@@ -76,13 +76,14 @@ final class SlidingPanelBuilder extends StatefulWidget {
 
 final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     with SingleTickerProviderStateMixin {
-  SlidingPanelController? _controller;
+  final _controller = SlidingPanelController();
+  late final AnimationController animationController;
 
   final scrollAreaTracker = _ScrollAreaTracker();
   VelocityTracker? velocityTracker;
 
   SlidingPanelController get controller {
-    return widget.controller ?? _controller!;
+    return widget.controller ?? _controller;
   }
 
   double get velocity {
@@ -92,26 +93,45 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
   @override
   void initState() {
     super.initState();
-    if (widget.controller == null) {
-      _controller = SlidingPanelController(vsync: this);
-    }
-    controller._extent = widget._extent;
-    controller.value = widget.initialExtent;
+    controller
+      .._extent = widget._extent
+      ..value = widget.initialExtent;
+    animationController = AnimationController(vsync: this);
+    controller._attach(animationController);
   }
 
   @override
   void didUpdateWidget(covariant SlidingPanelBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final providedController = widget.controller;
+    final oldController = oldWidget.controller;
+    final newController = widget.controller;
 
-    if (providedController == null) {
-      _controller ??= SlidingPanelController(vsync: this);
-      if (oldWidget.controller case SlidingPanelController(:final value)) {
-        _controller?.value = value;
-      }
-    } else if (_controller case SlidingPanelController(:final value)) {
-      providedController.value = value;
+    switch ((oldController, newController)) {
+      case (null, null):
+        break;
+
+      case (null, final SlidingPanelController newController):
+        newController.value = _controller.value;
+        _controller._detach();
+        newController._attach(animationController);
+
+      case (final SlidingPanelController oldController, null):
+        _controller.value = oldController.value;
+        oldController._detach();
+        _controller._attach(animationController);
+
+      case (final oldController, final newController)
+          when identical(oldController, newController):
+        break;
+
+      case (
+        final SlidingPanelController oldController,
+        final SlidingPanelController newController,
+      ):
+        newController.value = oldController.value;
+        oldController._detach();
+        newController._attach(animationController);
     }
 
     final newExtent = widget._extent;
@@ -130,7 +150,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
   @override
   void dispose() {
-    _controller?.dispose();
+    animationController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -181,6 +202,10 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
       snapPoint = snapPoints[(index - 1).clamp(0, snapPoints.length - 1)];
     }
 
+    if (snapPoint == extent) {
+      return;
+    }
+
     final snapToEdge = snapPoint == minExtent || snapPoint == maxExtent;
 
     switch (springDescription) {
@@ -195,7 +220,6 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
             snapToEnd: true,
           ),
         );
-        controller.jumpTo(snapPoint);
 
       case _:
         final pixels = (extent - snapPoint).abs() * controller.availablePixels;
@@ -206,6 +230,10 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
           duration: Duration(milliseconds: (seconds * 1000).round()),
           curve: Curves.ease,
         );
+    }
+
+    if (animationController.isCompleted) {
+      controller.jumpTo(snapPoint);
     }
   }
 
@@ -393,15 +421,12 @@ final class _ScrollAreaTracker {
 }
 
 final class SlidingPanelController extends ValueNotifier<double> {
-  final AnimationController _animationController;
+  AnimationController? _animationController;
 
-  bool _attached = false;
   SlidingPanelExtent _extent = const SlidingPanelExtent();
   double? _availablePixels;
 
-  SlidingPanelController({required TickerProvider vsync})
-    : _animationController = AnimationController(vsync: vsync),
-      super(0.0);
+  SlidingPanelController() : super(0.0);
 
   double get availablePixels => _availablePixels!;
 
@@ -411,29 +436,26 @@ final class SlidingPanelController extends ValueNotifier<double> {
 
   @override
   @protected
-  set value(double value) {
-    super.value = value.clamp(_extent.minExtent, _extent.maxExtent);
+  set value(double newValue) {
+    super.value = newValue.clamp(_extent.minExtent, _extent.maxExtent);
   }
 
   double get normalizedValue {
     final range = _extent.range;
-    if (range == 0) {
-      return 0;
-    }
+    if (range == 0) return 0;
     return (value - _extent.minExtent) / range;
   }
 
   @override
   void dispose() {
     _detach();
-    _animationController.dispose();
     super.dispose();
   }
 
   void jumpTo(double extent) {
-    if (_animationController.isAnimating) {
-      _animationController.stop();
-    }
+    _animationController
+      ?..stop()
+      ..removeListener(_onTick);
     value = extent;
   }
 
@@ -442,53 +464,58 @@ final class SlidingPanelController extends ValueNotifier<double> {
     required Duration duration,
     required Curve curve,
   }) async {
-    if (_animationController.isAnimating) {
-      _animationController.stop();
+    final animationController = _animationController;
+    if (animationController == null) {
+      return;
     }
 
-    _animationController.value = value;
-    _attach();
+    _prepareForAnimation();
 
     try {
-      await _animationController.animateTo(
+      await animationController.animateTo(
         extent,
         duration: duration,
         curve: curve,
       );
     } finally {
-      _detach();
+      animationController.removeListener(_onTick);
     }
   }
 
   Future<void> animateWith(Simulation simulation) async {
-    if (_animationController.isAnimating) {
-      _animationController.stop();
+    final animationController = _animationController;
+    if (animationController == null) {
+      return;
     }
 
-    _animationController.value = value;
-    _attach();
+    _prepareForAnimation();
 
     try {
-      await _animationController.animateWith(simulation);
+      await animationController.animateWith(simulation);
     } finally {
-      _detach();
+      animationController.removeListener(_onTick);
     }
   }
 
-  void _attach() {
-    if (!_attached) {
-      _animationController.addListener(_onTick);
-      _attached = true;
-    }
-    _animationController.stop();
+  void _prepareForAnimation() {
+    _animationController
+      ?..stop()
+      ..value = value
+      ..addListener(_onTick);
+  }
+
+  void _attach(AnimationController controller) {
+    _animationController = controller;
   }
 
   void _detach() {
-    if (_attached) {
-      _animationController.removeListener(_onTick);
-      _attached = false;
-    }
+    _animationController?.removeListener(_onTick);
+    _animationController = null;
   }
 
-  void _onTick() => value = _animationController.value;
+  void _onTick() {
+    if (_animationController?.value case final double value) {
+      this.value = value;
+    }
+  }
 }

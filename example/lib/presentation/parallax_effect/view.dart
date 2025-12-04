@@ -8,15 +8,8 @@ class ParallaxEffectExample extends StatefulWidget {
   State<ParallaxEffectExample> createState() => _ParallaxEffectExampleState();
 }
 
-class _ParallaxEffectExampleState extends State<ParallaxEffectExample>
-    with SingleTickerProviderStateMixin {
-  late final SlidingPanelController panelCtrl;
-
-  @override
-  void initState() {
-    super.initState();
-    panelCtrl = SlidingPanelController(vsync: this);
-  }
+class _ParallaxEffectExampleState extends State<ParallaxEffectExample> {
+  final panelCtrl = SlidingPanelController();
 
   @override
   void dispose() {

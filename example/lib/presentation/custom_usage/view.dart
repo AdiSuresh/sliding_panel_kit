@@ -8,15 +8,8 @@ class CustomUsageExample extends StatefulWidget {
   State<CustomUsageExample> createState() => _CustomUsageExampleState();
 }
 
-class _CustomUsageExampleState extends State<CustomUsageExample>
-    with TickerProviderStateMixin {
-  late final SlidingPanelController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = SlidingPanelController(vsync: this);
-  }
+class _CustomUsageExampleState extends State<CustomUsageExample> {
+  final controller = SlidingPanelController();
 
   @override
   void dispose() {
@@ -37,7 +30,7 @@ class _CustomUsageExampleState extends State<CustomUsageExample>
                 extents: [0.75],
                 velocityRange: (400, 2400),
                 springDescription: SpringDescription(
-                  mass: 1.2,
+                  mass: 1.1,
                   stiffness: 300,
                   damping: 30,
                 ),
