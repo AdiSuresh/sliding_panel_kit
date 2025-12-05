@@ -8,15 +8,8 @@ class ParallaxEffectExample extends StatefulWidget {
   State<ParallaxEffectExample> createState() => _ParallaxEffectExampleState();
 }
 
-class _ParallaxEffectExampleState extends State<ParallaxEffectExample>
-    with SingleTickerProviderStateMixin {
-  late final SlidingPanelController panelCtrl;
-
-  @override
-  void initState() {
-    super.initState();
-    panelCtrl = SlidingPanelController(vsync: this);
-  }
+class _ParallaxEffectExampleState extends State<ParallaxEffectExample> {
+  final panelCtrl = SlidingPanelController();
 
   @override
   void dispose() {
@@ -26,7 +19,6 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample>
 
   @override
   Widget build(BuildContext context) {
-    ValueListenableBuilder;
     return Scaffold(
       body: Stack(
         children: [
@@ -34,22 +26,26 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample>
             animation: panelCtrl,
             builder: (context, child) {
               final progress = panelCtrl.normalizedValue;
-              final offset = progress * 48;
+              const pixels = 16;
+              final offset = progress * pixels;
 
               return Positioned.fill(
                 child: Transform.translate(
-                  offset: Offset(0, -offset),
+                  offset: Offset(0, offset),
                   child: child,
                 ),
               );
             },
-            child: Image.asset('assets/mountain.jpg', fit: BoxFit.cover),
+            child: Transform.scale(
+              scale: 1.25,
+              child: Image.asset('assets/mountain.jpg', fit: BoxFit.cover),
+            ),
           ),
           AnimatedBuilder(
             animation: panelCtrl,
             builder: (context, child) {
               final progress = panelCtrl.normalizedValue;
-              final offset = progress * 96;
+              final offset = progress * 64;
 
               return Transform.translate(
                 offset: Offset(0, -offset),
@@ -79,7 +75,7 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample>
             child: SlidingPanelBuilder(
               controller: panelCtrl,
               snapConfig: SlidingPanelSnapConfig(
-                sizes: [0.75],
+                extents: [0.75],
                 springDescription: SpringDescription(
                   mass: 1.2,
                   stiffness: 300,

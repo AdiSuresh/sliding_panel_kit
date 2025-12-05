@@ -17,8 +17,8 @@ RouteBase get $homeRoute => GoRouteData.$route(
       factory: $BasicUsageRoute._fromState,
     ),
     GoRouteData.$route(
-      path: '/custom-snapping',
-      factory: $CustomSnappingRoute._fromState,
+      path: '/custom-usage',
+      factory: $CustomUsageRoute._fromState,
     ),
     GoRouteData.$route(
       path: '/parallax-effect',
@@ -68,12 +68,12 @@ mixin $BasicUsageRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $CustomSnappingRoute on GoRouteData {
-  static CustomSnappingRoute _fromState(GoRouterState state) =>
-      const CustomSnappingRoute();
+mixin $CustomUsageRoute on GoRouteData {
+  static CustomUsageRoute _fromState(GoRouterState state) =>
+      const CustomUsageRoute();
 
   @override
-  String get location => GoRouteData.$location('/custom-snapping');
+  String get location => GoRouteData.$location('/custom-usage');
 
   @override
   void go(BuildContext context) => context.go(location);

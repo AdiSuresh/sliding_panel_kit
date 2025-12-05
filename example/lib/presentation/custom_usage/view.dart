@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:sliding_panel_kit/sliding_panel_kit.dart';
 
-class CustomSnappingExample extends StatefulWidget {
-  const CustomSnappingExample({super.key});
+class CustomUsageExample extends StatefulWidget {
+  const CustomUsageExample({super.key});
 
   @override
-  State<CustomSnappingExample> createState() => _CustomSnappingExampleState();
+  State<CustomUsageExample> createState() => _CustomUsageExampleState();
 }
 
-class _CustomSnappingExampleState extends State<CustomSnappingExample>
-    with TickerProviderStateMixin {
-  late final SlidingPanelController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = SlidingPanelController(vsync: this);
-  }
+class _CustomUsageExampleState extends State<CustomUsageExample> {
+  final controller = SlidingPanelController();
 
   @override
   void dispose() {
@@ -34,10 +27,10 @@ class _CustomSnappingExampleState extends State<CustomSnappingExample>
             SlidingPanelBuilder(
               controller: controller,
               snapConfig: SlidingPanelSnapConfig(
-                sizes: [0.75],
+                extents: [0.75],
                 velocityRange: (400, 2400),
                 springDescription: SpringDescription(
-                  mass: 1.2,
+                  mass: 1.1,
                   stiffness: 300,
                   damping: 30,
                 ),

@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sliding_panel_kit/src/extent/extent.dart';
 import 'package:sliding_panel_kit/src/snap_config/snap_config.dart';
 
 final class SlidingPanelBuilder extends StatefulWidget {
-  final SlidingPanelController controller;
-  final double minSize;
-  final double maxSize;
+  final SlidingPanelController? controller;
+  final double minExtent;
+  final double maxExtent;
+  final double initialExtent;
   final SlidingPanelSnapConfig snapConfig;
   final PreferredSizeWidget? handle;
   final Widget Function(BuildContext context, Widget? handle) builder;
@@ -18,84 +18,140 @@ final class SlidingPanelBuilder extends StatefulWidget {
 
   SlidingPanelBuilder({
     super.key,
-    required this.controller,
-    this.minSize = 0.0,
-    this.maxSize = 1.0,
+    this.controller,
+    this.minExtent = 0.0,
+    this.maxExtent = 1.0,
+    double? initialExtent,
     SlidingPanelSnapConfig? snapConfig,
     this.handle,
     required this.builder,
   }) : assert(
-         minSize >= 0 && minSize <= 1,
-         'Minimum size must be between 0.0 and 1.0 inclusive.',
+         minExtent >= 0 && minExtent <= 1,
+         'Minimum extent must be between 0.0 and 1.0 inclusive.',
        ),
        assert(
-         maxSize >= 0 && minSize <= 1,
-         'Maximum size must be between 0.0 and 1.0 inclusive.',
+         maxExtent >= 0 && maxExtent <= 1,
+         'Maximum extent must be between 0.0 and 1.0 inclusive.',
        ),
        assert(
-         minSize <= maxSize,
-         'Minimum size cannot be greater than maximum size.',
+         minExtent <= maxExtent,
+         'Minimum extent cannot be greater than maximum extent.',
        ),
-       snapConfig = _processSnapPointsArg(snapConfig, minSize, maxSize),
+       assert(
+         switch (initialExtent) {
+           null => true,
+           final value => value >= minExtent && value <= maxExtent,
+         },
+         'Initial extent must be between $minExtent and $maxExtent inclusive.',
+       ),
+       initialExtent = initialExtent ?? minExtent,
+       snapConfig = _processSnapPointsArg(snapConfig, minExtent, maxExtent),
        _handleHeight = handle?.preferredSize.height ?? 0.0;
 
   static SlidingPanelSnapConfig _processSnapPointsArg(
     SlidingPanelSnapConfig? snapConfig,
-    double minSize,
-    double maxSize,
+    double minExtent,
+    double maxExtent,
   ) {
-    final sizes = {minSize, maxSize, ...?snapConfig?.sizes}.toList();
+    final snapPoints = {minExtent, maxExtent, ...?snapConfig?.extents}.toList();
     assert(
-      sizes.every((e) => e >= minSize && e <= maxSize),
-      'All snapSizes must be between minSize and maxSize inclusive.',
+      snapPoints.every((e) => e >= minExtent && e <= maxExtent),
+      'All snap points must be between $minExtent and $maxExtent inclusive.',
     );
-    sizes.sort();
+    snapPoints.sort();
     return switch (snapConfig) {
-      null => SlidingPanelSnapConfig(sizes: sizes),
-      _ => snapConfig.copyWith(sizes: sizes),
+      null => SlidingPanelSnapConfig(extents: snapPoints),
+      _ => snapConfig.copyWith(extents: snapPoints),
     };
   }
 
   SlidingPanelExtent get _extent {
-    return SlidingPanelExtent(minSize: minSize, maxSize: maxSize);
+    return SlidingPanelExtent(minExtent: minExtent, maxExtent: maxExtent);
   }
 
   @override
   State<SlidingPanelBuilder> createState() => _SlidingPanelBuilderState();
 }
 
-final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
+final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
+    with SingleTickerProviderStateMixin {
+  final _controller = SlidingPanelController();
+  late final AnimationController animationController;
+
   final scrollAreaTracker = _ScrollAreaTracker();
   VelocityTracker? velocityTracker;
+
+  SlidingPanelController get controller {
+    return widget.controller ?? _controller;
+  }
 
   double get velocity {
     return velocityTracker?.getVelocity().pixelsPerSecond.dy ?? 0;
   }
 
-  SlidingPanelController get controller => widget.controller;
-
   @override
   void initState() {
     super.initState();
-    controller._extent = widget._extent;
+    controller
+      .._extent = widget._extent
+      ..value = widget.initialExtent;
+    animationController = AnimationController(vsync: this);
+    controller._attach(animationController);
   }
 
   @override
   void didUpdateWidget(covariant SlidingPanelBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    final oldController = oldWidget.controller;
+    final newController = widget.controller;
+
+    switch ((oldController, newController)) {
+      case (null, null):
+        break;
+
+      case (null, final SlidingPanelController newController):
+        newController.value = _controller.value;
+        _controller._detach();
+        newController._attach(animationController);
+
+      case (final SlidingPanelController oldController, null):
+        _controller.value = oldController.value;
+        oldController._detach();
+        _controller._attach(animationController);
+
+      case (final oldController, final newController)
+          when identical(oldController, newController):
+        break;
+
+      case (
+        final SlidingPanelController oldController,
+        final SlidingPanelController newController,
+      ):
+        newController.value = oldController.value;
+        oldController._detach();
+        newController._attach(animationController);
+    }
+
     final newExtent = widget._extent;
     final extentChanged = oldWidget._extent != newExtent;
 
-    final sizesChanged = !listEquals(
-      oldWidget.snapConfig.sizes,
-      widget.snapConfig.sizes,
+    final snapPointsChanged = !listEquals(
+      oldWidget.snapConfig.extents,
+      widget.snapConfig.extents,
     );
 
-    if (extentChanged || sizesChanged) {
+    if (extentChanged || snapPointsChanged) {
       controller._extent = newExtent;
       snap();
     }
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 
   void drag(double dy) {
@@ -103,49 +159,33 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
     if (pixels case 0) {
       return;
     }
-    controller.jumpTo(controller.value - dy * widget.maxSize / pixels);
-  }
-
-  double findSnapPoint(double current) {
-    return widget.snapConfig.sizes.reduce(
-      (a, b) => (current - a).abs() < (current - b).abs() ? a : b,
-    );
-  }
-
-  int findSnapPointIndex(double current) {
-    return widget.snapConfig.sizes.indexOf(findSnapPoint(current));
+    controller.jumpTo(controller.value - dy * widget.maxExtent / pixels);
   }
 
   bool isSnapPoint(double current) {
-    return current == findSnapPoint(current);
+    final (_, nearestExtent) = widget.snapConfig.findNearestExtent(current);
+    return current == nearestExtent;
   }
 
   Future<void> snap() async {
-    final size = controller.value;
+    final extent = controller.value;
     final velocity = this.velocity;
-    final index = findSnapPointIndex(size);
-
-    final SlidingPanelBuilder(:minSize, :maxSize) = widget;
 
     final SlidingPanelSnapConfig(
-      sizes: snapSizes,
       velocityRange: (lower, upper),
       :springDescription,
+      :findNextExtent,
     ) = widget.snapConfig;
 
-    var snapPoint = snapSizes[index];
+    final snapPoint = findNextExtent(extent, velocity);
 
-    if (velocity < -upper) {
-      snapPoint = maxSize;
-    } else if (velocity < -lower) {
-      snapPoint = snapSizes[(index + 1).clamp(0, snapSizes.length - 1)];
-    } else if (velocity > upper) {
-      snapPoint = minSize;
-    } else if (velocity > lower) {
-      snapPoint = snapSizes[(index - 1).clamp(0, snapSizes.length - 1)];
+    if (snapPoint == extent) {
+      return;
     }
 
-    final snapToEdge = snapPoint == minSize || snapPoint == maxSize;
+    final SlidingPanelBuilder(:minExtent, :maxExtent) = widget;
+
+    final snapToEdge = snapPoint == minExtent || snapPoint == maxExtent;
 
     switch (springDescription) {
       case != null when !snapToEdge:
@@ -153,16 +193,15 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
         await controller.animateWith(
           SpringSimulation(
             springDescription,
-            size,
+            extent,
             snapPoint,
             speed / 5000,
             snapToEnd: true,
           ),
         );
-        controller.jumpTo(snapPoint);
 
       case _:
-        final pixels = (size - snapPoint).abs() * controller.availablePixels;
+        final pixels = (extent - snapPoint).abs() * controller.availablePixels;
         final speed = velocity.abs().clamp(1000, 5000);
         final seconds = pixels / speed;
         await controller.animateTo(
@@ -170,6 +209,10 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
           duration: Duration(milliseconds: (seconds * 1000).round()),
           curve: Curves.ease,
         );
+    }
+
+    if (animationController.isCompleted) {
+      controller.jumpTo(snapPoint);
     }
   }
 
@@ -293,8 +336,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder> {
 
                 controller._availablePixels = availablePixels;
 
-                final maxHeight = availablePixels * widget.maxSize;
-                final minHeight = availablePixels * widget.minSize;
+                final maxHeight = availablePixels * widget.maxExtent;
+                final minHeight = availablePixels * widget.minExtent;
 
                 final travel = (maxHeight - minHeight) - widget._handleHeight;
 
@@ -357,105 +400,103 @@ final class _ScrollAreaTracker {
 }
 
 final class SlidingPanelController extends ValueNotifier<double> {
-  final double initialSize;
-  final AnimationController _animationController;
+  AnimationController? _animationController;
 
-  bool _attached = false;
   SlidingPanelExtent _extent = const SlidingPanelExtent();
   double? _availablePixels;
 
-  SlidingPanelController({
-    this.initialSize = 0.0,
-    required TickerProvider vsync,
-  }) : _animationController = AnimationController(vsync: vsync),
-       super(initialSize);
+  SlidingPanelController() : super(0.0);
 
   double get availablePixels => _availablePixels!;
 
   double get pixels => value * availablePixels;
 
-  double get maxPixels => _extent.maxSize * availablePixels;
+  double get maxPixels => _extent.maxExtent * availablePixels;
 
   @override
   @protected
-  set value(double value) {
-    super.value = value.clamp(_extent.minSize, _extent.maxSize);
+  set value(double newValue) {
+    super.value = newValue.clamp(_extent.minExtent, _extent.maxExtent);
   }
 
   double get normalizedValue {
-    final range = _extent.maxSize - _extent.minSize;
+    final range = _extent.range;
     if (range == 0) {
       return 0;
     }
-    return (value - _extent.minSize) / range;
+    return (value - _extent.minExtent) / range;
   }
 
   @override
   void dispose() {
     _detach();
-    _animationController.dispose();
     super.dispose();
   }
 
-  void jumpTo(double size) {
-    if (_animationController.isAnimating) {
-      _animationController.stop();
-    }
-    value = size;
+  void jumpTo(double extent) {
+    _animationController
+      ?..stop()
+      ..removeListener(_onTick);
+    value = extent;
   }
 
   Future<void> animateTo(
-    double size, {
+    double extent, {
     required Duration duration,
     required Curve curve,
   }) async {
-    if (_animationController.isAnimating) {
-      _animationController.stop();
+    final animationController = _animationController;
+    if (animationController == null) {
+      return;
     }
 
-    _animationController.value = value;
-    _attach();
+    _prepareForAnimation();
 
     try {
-      await _animationController.animateTo(
-        size,
+      await animationController.animateTo(
+        extent,
         duration: duration,
         curve: curve,
       );
     } finally {
-      _detach();
+      animationController.removeListener(_onTick);
     }
   }
 
   Future<void> animateWith(Simulation simulation) async {
-    if (_animationController.isAnimating) {
-      _animationController.stop();
+    final animationController = _animationController;
+    if (animationController == null) {
+      return;
     }
 
-    _animationController.value = value;
-    _attach();
+    _prepareForAnimation();
 
     try {
-      await _animationController.animateWith(simulation);
+      await animationController.animateWith(simulation);
     } finally {
-      _detach();
+      animationController.removeListener(_onTick);
     }
   }
 
-  void _attach() {
-    if (!_attached) {
-      _animationController.addListener(_onTick);
-      _attached = true;
-    }
-    _animationController.stop();
+  void _prepareForAnimation() {
+    _animationController
+      ?..stop()
+      ..value = value
+      ..addListener(_onTick);
+  }
+
+  void _attach(AnimationController controller) {
+    _animationController = controller;
   }
 
   void _detach() {
-    if (_attached) {
-      _animationController.removeListener(_onTick);
-      _attached = false;
-    }
+    _animationController?.removeListener(_onTick);
+    _animationController = null;
   }
 
-  void _onTick() => value = _animationController.value;
+  void _onTick() {
+    if (_animationController?.value case final double value) {
+      this.value = value;
+    }
+  }
 }

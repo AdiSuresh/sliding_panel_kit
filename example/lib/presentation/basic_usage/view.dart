@@ -8,15 +8,8 @@ class BasicUsageExample extends StatefulWidget {
   State<BasicUsageExample> createState() => _BasicUsageExampleState();
 }
 
-class _BasicUsageExampleState extends State<BasicUsageExample>
-    with TickerProviderStateMixin {
-  late final SlidingPanelController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = SlidingPanelController(vsync: this);
-  }
+class _BasicUsageExampleState extends State<BasicUsageExample> {
+  final controller = SlidingPanelController();
 
   @override
   void dispose() {
@@ -33,7 +26,7 @@ class _BasicUsageExampleState extends State<BasicUsageExample>
             // Content behind the panel
             SlidingPanelBuilder(
               controller: controller,
-              snapConfig: SlidingPanelSnapConfig(sizes: [0.75]),
+              snapConfig: SlidingPanelSnapConfig(extents: [0.75]),
               handle: const SlidingPanelHandle(),
               builder: (context, handle) {
                 return SlidingPanelBody(
