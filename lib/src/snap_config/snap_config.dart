@@ -14,7 +14,7 @@ final class SlidingPanelSnapConfig {
     List<double> extents = const [],
     this.velocityRange = (500, 2500),
     this.springDescription,
-  }) : _extents = List.of(extents)..sort(),
+  }) : _extents = List.of(extents, growable: false)..sort(),
        assert(
          extents.every((e) => e >= 0 && e <= 1),
          'All snap points must be between 0.0 and 1.0 inclusive.',
