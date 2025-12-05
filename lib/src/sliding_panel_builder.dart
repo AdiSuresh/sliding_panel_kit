@@ -162,48 +162,28 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     controller.jumpTo(controller.value - dy * widget.maxExtent / pixels);
   }
 
-  double findSnapPoint(double current) {
-    return widget.snapConfig.extents.reduce(
-      (a, b) => (current - a).abs() < (current - b).abs() ? a : b,
-    );
-  }
-
-  int findSnapPointIndex(double current) {
-    return widget.snapConfig.extents.indexOf(findSnapPoint(current));
-  }
-
   bool isSnapPoint(double current) {
-    return current == findSnapPoint(current);
+    final (_, nearestExtent) = widget.snapConfig.findNearestExtent(current);
+    return current == nearestExtent;
   }
 
   Future<void> snap() async {
     final extent = controller.value;
     final velocity = this.velocity;
-    final index = findSnapPointIndex(extent);
-
-    final SlidingPanelBuilder(:minExtent, :maxExtent) = widget;
 
     final SlidingPanelSnapConfig(
-      extents: snapPoints,
       velocityRange: (lower, upper),
       :springDescription,
+      :findNextExtent,
     ) = widget.snapConfig;
 
-    var snapPoint = snapPoints[index];
-
-    if (velocity < -upper) {
-      snapPoint = maxExtent;
-    } else if (velocity < -lower) {
-      snapPoint = snapPoints[(index + 1).clamp(0, snapPoints.length - 1)];
-    } else if (velocity > upper) {
-      snapPoint = minExtent;
-    } else if (velocity > lower) {
-      snapPoint = snapPoints[(index - 1).clamp(0, snapPoints.length - 1)];
-    }
+    final snapPoint = findNextExtent(extent, velocity);
 
     if (snapPoint == extent) {
       return;
     }
+
+    final SlidingPanelBuilder(:minExtent, :maxExtent) = widget;
 
     final snapToEdge = snapPoint == minExtent || snapPoint == maxExtent;
 
