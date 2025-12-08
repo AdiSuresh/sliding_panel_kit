@@ -2,6 +2,10 @@
 
 A simple and lightweight solution for building sliding-up panels for Flutter with smooth drag gestures, snap-points, and built-in scroll coordination for scrollable content.
 
+## Preview
+
+![](assets/demo.gif)
+
 ## Features
 
 **Build custom sliding-up panels**
