@@ -4,7 +4,8 @@ A simple and lightweight solution for building sliding-up panels for Flutter wit
 
 ## Preview
 
-![](assets/demo.gif)
+<img src="assets/demo.gif" width="300">
+
 
 ## Features
 
