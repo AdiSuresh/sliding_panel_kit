@@ -4,7 +4,7 @@ A simple and lightweight solution for building sliding-up panels for Flutter wit
 
 ## Preview
 
-![](assets/demo.gif)
+![](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/assets/demo.gif)
 
 ## Features
 
