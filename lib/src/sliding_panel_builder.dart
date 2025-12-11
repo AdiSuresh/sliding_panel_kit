@@ -239,11 +239,11 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
           case ScrollUpdateNotification(:final dragDetails):
             final position = Scrollable.of(context).position;
-            final isSnapPoint = this.isSnapPoint(controller.value);
+            final atSnapPoint = isSnapPoint(controller.value);
 
             if (dragDetails == null) {
               scrollAreaTracker.reset();
-              if (!isSnapPoint) {
+              if (!atSnapPoint) {
                 position.correctBy(-(notification.scrollDelta ?? 0.0));
                 position.hold(() {}).cancel();
               }
@@ -267,28 +267,32 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
               final correction = dy.abs();
               if (pixels < minScrollExtent) {
                 if (pixels + correction >= minScrollExtent) {
-                  correctPixels(minScrollExtent);
+                  if (!atSnapPoint) {
+                    correctPixels(minScrollExtent);
+                  }
                   scrollAreaTracker.reset();
                   break;
                 }
-                if (!isSnapPoint) {
+                if (!atSnapPoint) {
                   correctBy(correction);
                   scrollAreaTracker.reset();
                   break;
                 }
               } else {
                 if (pixels - correction <= maxScrollExtent) {
-                  correctPixels(maxScrollExtent);
+                  if (!atSnapPoint) {
+                    correctPixels(maxScrollExtent);
+                  }
                   scrollAreaTracker.reset();
                   break;
                 }
-                if (!isSnapPoint) {
+                if (!atSnapPoint) {
                   correctBy(-correction);
                   scrollAreaTracker.reset();
                   break;
                 }
               }
-            } else if (!isSnapPoint) {
+            } else if (!atSnapPoint) {
               final correction = !axisDirection.reverse ? dy : -dy;
               final newPixels = pixels + correction;
               if (newPixels < minScrollExtent) {
