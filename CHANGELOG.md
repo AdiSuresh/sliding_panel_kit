@@ -1,4 +1,4 @@
-## 0.0.2+1
+## 0.0.3
 
 ### Added
-- Adjust width of demo in README.md
+- Smarter scroll coordination algorithm
