@@ -258,9 +258,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
               :pixels,
               :minScrollExtent,
               :maxScrollExtent,
-              :userScrollDirection,
-              :correctBy,
               :correctPixels,
+              :correctBy,
             ) = position;
 
             if (outOfRange) {
