@@ -89,6 +89,12 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     return velocityTracker?.getVelocity().pixelsPerSecond.dy ?? 0;
   }
 
+  bool get atEdge {
+    final value = controller.value;
+    final SlidingPanelBuilder(:minExtent, :maxExtent) = widget;
+    return value == minExtent || value == maxExtent;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -233,11 +239,11 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
           case ScrollUpdateNotification(:final dragDetails):
             final position = Scrollable.of(context).position;
-            final isSnapPoint = this.isSnapPoint(controller.value);
+            final atSnapPoint = isSnapPoint(controller.value);
 
             if (dragDetails == null) {
               scrollAreaTracker.reset();
-              if (!isSnapPoint) {
+              if (!atSnapPoint) {
                 position.correctBy(-(notification.scrollDelta ?? 0.0));
                 position.hold(() {}).cancel();
               }
@@ -252,50 +258,50 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
               :pixels,
               :minScrollExtent,
               :maxScrollExtent,
+              :correctPixels,
               :correctBy,
             ) = position;
 
             if (outOfRange) {
-              if (!axisDirection.reverse) {
-                if (pixels < minScrollExtent) {
-                  scrollAreaTracker.reset();
-                  correctBy(dy.abs());
-                  break;
-                } else if (dy < 0) {
-                  scrollAreaTracker.reset();
-                  if (!isSnapPoint) {
-                    correctBy(dy);
+              final correction = dy.abs();
+              if (pixels < minScrollExtent) {
+                if (pixels + correction >= minScrollExtent) {
+                  if (!atSnapPoint) {
+                    correctPixels(minScrollExtent);
                   }
+                  scrollAreaTracker.reset();
                   break;
-                } else if (pixels - dy < maxScrollExtent) {
+                }
+                if (!atSnapPoint) {
+                  correctBy(correction);
                   scrollAreaTracker.reset();
                   break;
                 }
               } else {
-                if (pixels > maxScrollExtent) {
-                  scrollAreaTracker.reset();
-                  if (!isSnapPoint && dy > 0) {
-                    correctBy(-dy);
+                if (pixels - correction <= maxScrollExtent) {
+                  if (!atSnapPoint) {
+                    correctPixels(maxScrollExtent);
                   }
-                  break;
-                } else if (dy < 0) {
                   scrollAreaTracker.reset();
-                  if (!isSnapPoint) {
-                    correctBy(-dy);
-                  }
                   break;
-                } else if (pixels + dy > minScrollExtent) {
+                }
+                if (!atSnapPoint) {
+                  correctBy(-correction);
                   scrollAreaTracker.reset();
                   break;
                 }
               }
-            } else if (!isSnapPoint) {
+            } else if (!atSnapPoint) {
+              final correction = !axisDirection.reverse ? dy : -dy;
+              final newPixels = pixels + correction;
+              if (newPixels < minScrollExtent) {
+                correctPixels(minScrollExtent);
+              } else if (newPixels > maxScrollExtent) {
+                correctPixels(maxScrollExtent);
+              } else {
+                correctBy(correction);
+              }
               scrollAreaTracker.reset();
-              if (!axisDirection.reverse) {
-                correctBy(dy);
-              } else {
-                correctBy(-dy);
-              }
               break;
             }
 
