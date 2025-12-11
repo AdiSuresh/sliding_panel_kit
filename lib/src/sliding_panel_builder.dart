@@ -207,7 +207,9 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         );
 
       case _:
-        final pixels = (extent - snapPoint).abs() * controller.availablePixels;
+        final extentDiff = (snapPoint - extent).abs();
+        final maxPixels = controller.maxPixels - widget._handleHeight;
+        final pixels = extentDiff * maxPixels;
         final speed = velocity.abs().clamp(1000, 5000);
         final seconds = pixels / speed;
         await controller.animateTo(
