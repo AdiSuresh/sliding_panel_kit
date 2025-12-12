@@ -1,10 +1,10 @@
 import 'dart:collection';
-import 'package:flutter/physics.dart';
+import 'package:sliding_panel_kit/src/snap_animation/snap_animation.dart';
 
 final class SlidingPanelSnapConfig {
   final List<double> _extents;
   final (double lower, double upper) velocityRange;
-  final SpringDescription? springDescription;
+  final SnapAnimation animation;
 
   UnmodifiableListView<double> get extents {
     return UnmodifiableListView(_extents);
@@ -13,7 +13,7 @@ final class SlidingPanelSnapConfig {
   SlidingPanelSnapConfig({
     List<double> extents = const [],
     this.velocityRange = (500, 2500),
-    this.springDescription,
+    this.animation = const CurvedSnapAnimation(),
   }) : _extents = List.of(extents, growable: false)..sort(),
        assert(
          extents.every((e) => e >= 0 && e <= 1),
@@ -27,12 +27,12 @@ final class SlidingPanelSnapConfig {
   SlidingPanelSnapConfig copyWith({
     List<double>? extents,
     (double lower, double upper)? velocityRange,
-    SpringDescription? springDescription,
+    SnapAnimation? animation,
   }) {
     return SlidingPanelSnapConfig(
       extents: extents ?? _extents,
       velocityRange: velocityRange ?? this.velocityRange,
-      springDescription: springDescription ?? this.springDescription,
+      animation: animation ?? this.animation,
     );
   }
 
