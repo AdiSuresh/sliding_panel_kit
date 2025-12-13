@@ -1,3 +1,27 @@
+## 0.1.0
+## Added
+- New `SnapAnimation` API to support curved and spring-based snap animations via `CurvedSnapAnimation` and `SpringSnapAnimation`.
+
+### Breaking changes
+- `springDescription` has been replaced by `animation` in `SlidingPanelSnapConfig`.
+
+**Old:**
+```dart
+SlidingPanelSnapConfig(
+  springDescription: SpringDescription(...)
+)
+```
+
+**New:**
+```dart
+SlidingPanelSnapConfig(
+  animation: SpringSnapAnimation.fixed(
+    SpringDescription(...)
+  )
+)
+```
+
+
 ## 0.0.3
 
 ### Added
