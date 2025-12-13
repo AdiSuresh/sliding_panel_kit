@@ -135,7 +135,7 @@ Add a snap point:
 
 ```dart
 SlidingPanelBuilder(
-  snapConfig: SlidingPanelSnapConfig(extents: [0.75]), // minSize & maxSize already included
+  snapConfig: SlidingPanelSnapConfig(extents: [0.75]), // minExtent & maxExtent already included
   ...
 )
 ```
@@ -190,7 +190,7 @@ FloatingActionButton(
 For the complete example, see [`basic_usage/view.dart`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/basic_usage/view.dart).
 
 Here are some other examples:
-- [`Spring-based snapping`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/custom_snapping/view.dart)
+- [`Spring-based snapping`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/custom_usage/view.dart)
 - [`Parallax effect`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/parallax_effect/view.dart)
 
 

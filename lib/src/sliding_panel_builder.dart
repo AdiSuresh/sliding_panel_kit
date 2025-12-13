@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sliding_panel_kit/src/extent/extent.dart';
+import 'package:sliding_panel_kit/src/snap_animation/snap_animation.dart';
 import 'package:sliding_panel_kit/src/snap_config/snap_config.dart';
 
 final class SlidingPanelBuilder extends StatefulWidget {
@@ -177,11 +178,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     final extent = controller.value;
     final velocity = this.velocity;
 
-    final SlidingPanelSnapConfig(
-      velocityRange: (lower, upper),
-      :springDescription,
-      :findNextExtent,
-    ) = widget.snapConfig;
+    final SlidingPanelSnapConfig(:findNextExtent, :animation) =
+        widget.snapConfig;
 
     final snapPoint = findNextExtent(extent, velocity);
 
@@ -193,27 +191,35 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
     final snapToEdge = snapPoint == minExtent || snapPoint == maxExtent;
 
-    switch (springDescription) {
-      case != null when !snapToEdge:
-        final speed = velocity.abs().clamp(0, 5000);
-        await controller.animateWith(
-          SpringSimulation(
-            springDescription,
-            extent,
-            snapPoint,
-            speed / 5000,
-            snapToEnd: true,
-          ),
-        );
+    final extentDiff = (snapPoint - extent).abs();
+    final maxPixels = controller.maxPixels - widget._handleHeight;
+    final pixels = extentDiff * maxPixels;
 
-      case _:
-        final pixels = (extent - snapPoint).abs() * controller.availablePixels;
-        final speed = velocity.abs().clamp(1000, 5000);
-        final seconds = pixels / speed;
+    switch (animation) {
+      case CurvedSnapAnimation(:final curve, evaluate: final findDuration):
         await controller.animateTo(
           snapPoint,
-          duration: Duration(milliseconds: (seconds * 1000).round()),
-          curve: Curves.ease,
+          duration: findDuration(pixels, velocity),
+          curve: curve,
+        );
+
+      case SpringSnapAnimation(:final evaluate):
+        final spring = evaluate(pixels, velocity);
+        final maxSpeed = SnapAnimation.maxSpeed;
+        final speed = velocity.abs().clamp(1.0, maxSpeed);
+        await controller.animateWith(
+          SpringSimulation(
+            switch (snapToEdge) {
+              true => .withDurationAndBounce(
+                duration: spring.duration,
+                bounce: 0,
+              ),
+              _ => spring,
+            },
+            extent,
+            snapPoint,
+            speed / maxSpeed,
+          ),
         );
     }
 
