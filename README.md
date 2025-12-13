@@ -135,7 +135,7 @@ Add a snap point:
 
 ```dart
 SlidingPanelBuilder(
-  snapConfig: SlidingPanelSnapConfig(extents: [0.75]), // minSize & maxSize already included
+  snapConfig: SlidingPanelSnapConfig(extents: [0.75]), // minExtent & maxExtent already included
   ...
 )
 ```
