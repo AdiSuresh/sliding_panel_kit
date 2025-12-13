@@ -76,10 +76,8 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample> {
               controller: panelCtrl,
               snapConfig: SlidingPanelSnapConfig(
                 extents: [0.75],
-                springDescription: SpringDescription(
-                  mass: 1.2,
-                  stiffness: 300,
-                  damping: 30,
+                animation: SpringSnapAnimation.fixed(
+                  SpringDescription(mass: 1, stiffness: 350, damping: 30),
                 ),
               ),
               handle: const SlidingPanelHandle(),
