@@ -17,7 +17,6 @@ final class SpringSnapAnimation extends SnapAnimation<SpringDescription> {
 
   @override
   SpringDescription evaluate(double pixels, double velocity) {
-    final speed = velocity.abs().clamp(1.0, SnapAnimation.maxSpeed);
     switch (spec) {
       case FixedSpringSnap(:final spring):
         return spring;
@@ -25,6 +24,7 @@ final class SpringSnapAnimation extends SnapAnimation<SpringDescription> {
         duration: (final lower, final upper),
         :final bounce,
       ):
+        final speed = velocity.abs().clamp(1.0, SnapAnimation.maxSpeed);
         return SpringDescription.withDurationAndBounce(
           duration: Duration(
             milliseconds: (Duration.millisecondsPerSecond * pixels / speed)
