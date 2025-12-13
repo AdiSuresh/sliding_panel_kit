@@ -196,39 +196,25 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     final pixels = extentDiff * maxPixels;
 
     switch (animation) {
-      case CurvedSnapAnimation(:final curve, :final findDuration):
+      case CurvedSnapAnimation(:final curve, evaluate: final findDuration):
         await controller.animateTo(
           snapPoint,
           duration: findDuration(pixels, velocity),
           curve: curve,
         );
 
-      case SpringSnapAnimation(:final spec):
+      case SpringSnapAnimation(:final evaluate):
+        final spring = evaluate(pixels, velocity);
         final maxSpeed = SnapAnimation.maxSpeed;
         final speed = velocity.abs().clamp(1.0, maxSpeed);
-        final springDescription = switch (spec) {
-          FixedSpringSnap spec => spec.spring,
-          AdaptiveSpringSnap(
-            duration: (final lower, final upper),
-            :final bounce,
-          ) =>
-            SpringDescription.withDurationAndBounce(
-              duration: Duration(
-                milliseconds: (Duration.millisecondsPerSecond * pixels / speed)
-                    .round()
-                    .clamp(lower, upper),
-              ),
-              bounce: bounce * (snapPoint - extent).abs(),
-            ),
-        };
         await controller.animateWith(
           SpringSimulation(
             switch (snapToEdge) {
               true => .withDurationAndBounce(
-                duration: springDescription.duration,
+                duration: spring.duration,
                 bounce: 0,
               ),
-              _ => springDescription,
+              _ => spring,
             },
             extent,
             snapPoint,

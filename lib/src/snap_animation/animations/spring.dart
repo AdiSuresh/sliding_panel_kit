@@ -1,10 +1,10 @@
 part of '../snap_animation.dart';
 
-final class SpringSnapAnimation extends SnapAnimation {
+final class SpringSnapAnimation extends SnapAnimation<SpringDescription> {
   final SpringSnapSpec spec;
 
   factory SpringSnapAnimation() {
-    return .adaptive(duration: (200, 400), bounce: 0.25);
+    return .adaptive(duration: (200, 400), bounce: 0.2);
   }
 
   SpringSnapAnimation.fixed(SpringDescription spring)
@@ -14,6 +14,27 @@ final class SpringSnapAnimation extends SnapAnimation {
     required (int, int) duration,
     required double bounce,
   }) : spec = AdaptiveSpringSnap(duration: duration, bounce: bounce);
+
+  @override
+  SpringDescription evaluate(double pixels, double velocity) {
+    final speed = velocity.abs().clamp(1.0, SnapAnimation.maxSpeed);
+    switch (spec) {
+      case FixedSpringSnap(:final spring):
+        return spring;
+      case AdaptiveSpringSnap(
+        duration: (final lower, final upper),
+        :final bounce,
+      ):
+        return SpringDescription.withDurationAndBounce(
+          duration: Duration(
+            milliseconds: (Duration.millisecondsPerSecond * pixels / speed)
+                .round()
+                .clamp(lower, upper),
+          ),
+          bounce: bounce,
+        );
+    }
+  }
 }
 
 sealed class SpringSnapSpec {

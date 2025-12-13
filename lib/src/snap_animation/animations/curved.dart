@@ -1,6 +1,6 @@
 part of '../snap_animation.dart';
 
-final class CurvedSnapAnimation extends SnapAnimation {
+final class CurvedSnapAnimation extends SnapAnimation<Duration> {
   final Curve curve;
   final (int, int)? duration;
   final double minSpeed;
@@ -11,7 +11,8 @@ final class CurvedSnapAnimation extends SnapAnimation {
     this.minSpeed = 1000,
   });
 
-  Duration findDuration(double pixels, double velocity) {
+  @override
+  Duration evaluate(double pixels, double velocity) {
     final speed = velocity.abs().clamp(minSpeed, SnapAnimation.maxSpeed);
     final ms = (Duration.millisecondsPerSecond * pixels / speed).round();
     final clampedMs = switch (duration) {
