@@ -1,23 +1,23 @@
 part of '../snap_animation.dart';
 
 final class SpringSnapAnimation extends SnapAnimation<SpringDescription> {
-  final SpringSnapSpec spec;
+  final SpringSnapSpec _spec;
 
   factory SpringSnapAnimation() {
     return .adaptive(duration: (200, 400), bounce: 0.2);
   }
 
   SpringSnapAnimation.fixed(SpringDescription spring)
-    : spec = FixedSpringSnap(spring);
+    : _spec = FixedSpringSnap(spring);
 
   SpringSnapAnimation.adaptive({
     required (int, int) duration,
     required double bounce,
-  }) : spec = AdaptiveSpringSnap(duration: duration, bounce: bounce);
+  }) : _spec = AdaptiveSpringSnap(duration: duration, bounce: bounce);
 
   @override
   SpringDescription evaluate(double pixels, double velocity) {
-    switch (spec) {
+    switch (_spec) {
       case FixedSpringSnap(:final spring):
         return spring;
       case AdaptiveSpringSnap(
