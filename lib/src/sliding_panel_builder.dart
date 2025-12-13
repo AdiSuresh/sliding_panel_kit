@@ -207,8 +207,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         final maxSpeed = SnapAnimation.maxSpeed;
         final speed = velocity.abs().clamp(1.0, maxSpeed);
         final springDescription = switch (spec) {
-          SpringSnapFromDescription spec => spec.springDescription,
-          SpringSnapFromDurationAndBounce(
+          FixedSpringSnap spec => spec.spring,
+          AdaptiveSpringSnap(
             duration: (final lower, final upper),
             :final bounce,
           ) =>

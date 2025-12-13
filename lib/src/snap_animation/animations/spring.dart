@@ -4,37 +4,31 @@ final class SpringSnapAnimation extends SnapAnimation {
   final SpringSnapSpec spec;
 
   factory SpringSnapAnimation() {
-    return .fromDurationAndBounce(duration: (200, 400), bounce: 0.25);
+    return .adaptive(duration: (200, 400), bounce: 0.25);
   }
 
-  SpringSnapAnimation.fromDescription(SpringDescription springDescription)
-    : spec = SpringSnapFromDescription(springDescription);
+  SpringSnapAnimation.fixed(SpringDescription spring)
+    : spec = FixedSpringSnap(spring);
 
-  SpringSnapAnimation.fromDurationAndBounce({
+  SpringSnapAnimation.adaptive({
     required (int, int) duration,
     required double bounce,
-  }) : spec = SpringSnapFromDurationAndBounce(
-         duration: duration,
-         bounce: bounce,
-       );
+  }) : spec = AdaptiveSpringSnap(duration: duration, bounce: bounce);
 }
 
 sealed class SpringSnapSpec {
   const SpringSnapSpec();
 }
 
-final class SpringSnapFromDescription extends SpringSnapSpec {
-  final SpringDescription springDescription;
+final class FixedSpringSnap extends SpringSnapSpec {
+  final SpringDescription spring;
 
-  const SpringSnapFromDescription(this.springDescription);
+  const FixedSpringSnap(this.spring);
 }
 
-final class SpringSnapFromDurationAndBounce extends SpringSnapSpec {
+final class AdaptiveSpringSnap extends SpringSnapSpec {
   final (int, int) duration;
   final double bounce;
 
-  const SpringSnapFromDurationAndBounce({
-    required this.duration,
-    required this.bounce,
-  });
+  const AdaptiveSpringSnap({required this.duration, required this.bounce});
 }
