@@ -1,5 +1,10 @@
+## 0.1.1
+### Added
+- Support for controlling whether to use `minExtent` and `maxExtent` as snap points via `includeBoundaryExtents`.
+
+
 ## 0.1.0
-## Added
+### Added
 - New `SnapAnimation` API to support curved and spring-based snap animations via `CurvedSnapAnimation` and `SpringSnapAnimation`.
 
 ### Breaking changes
