@@ -27,8 +27,8 @@ A simple and lightweight solution for building sliding-up panels for Flutter wit
 - Overscroll smoothly expands or collapses the panel, similar to Google Maps or Apple Music.
 
 **Snap-point system**
+- Supports option to configure curve-based and spring-based snapping.
 - Automatically snaps to the nearest point when released.
-- Supports option to configure spring-based snapping.
 
 ## Important note
 
@@ -127,11 +127,12 @@ SlidingPanelBuilder(
   },
 ),
 ```
+Adding a handle reveals part of the panel, allowing it to be dragged and snapped at min and max extents.
 
 
 ### Step 4:
 
-Add a snap point:
+Add an additional snap point:
 
 ```dart
 SlidingPanelBuilder(
@@ -139,8 +140,6 @@ SlidingPanelBuilder(
   ...
 )
 ```
-
-The panel now drags and snaps without needing a controller.
 
 
 ### Step 5:
