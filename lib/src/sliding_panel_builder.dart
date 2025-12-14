@@ -83,6 +83,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
   final _controller = SlidingPanelController();
   late final AnimationController animationController;
 
+  double snapPoint = 0.0;
+
   final scrollAreaTracker = _ScrollAreaTracker();
   VelocityTracker? velocityTracker;
 
@@ -108,6 +110,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
       ..value = widget.initialExtent;
     animationController = AnimationController(vsync: this);
     controller._attach(animationController);
+    snapPoint = widget.initialExtent;
   }
 
   @override
@@ -173,11 +176,6 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     controller.jumpTo(controller.value - dy * widget.maxExtent / pixels);
   }
 
-  bool isSnapPoint(double current) {
-    final (_, nearestExtent) = widget.snapConfig.findNearestExtent(current);
-    return current == nearestExtent;
-  }
-
   Future<void> snap() async {
     final extent = controller.value;
     final velocity = this.velocity;
@@ -188,6 +186,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     final snapPoint = findNextExtent(extent, velocity);
 
     if (snapPoint == extent) {
+      this.snapPoint = snapPoint;
       return;
     }
 
@@ -228,6 +227,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     }
 
     if (animationController.isCompleted) {
+      this.snapPoint = snapPoint;
       controller.jumpTo(snapPoint);
     }
   }
@@ -249,11 +249,15 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
           case ScrollUpdateNotification(:final dragDetails):
             final position = Scrollable.of(context).position;
-            final atSnapPoint = isSnapPoint(controller.value);
+            final canScroll = [
+              widget.minExtent,
+              snapPoint,
+              widget.maxExtent,
+            ].contains(controller.value);
 
             if (dragDetails == null) {
               scrollAreaTracker.reset();
-              if (!atSnapPoint) {
+              if (!canScroll) {
                 position.correctBy(-(notification.scrollDelta ?? 0.0));
                 position.hold(() {}).cancel();
               }
@@ -276,32 +280,32 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
               final correction = dy.abs();
               if (pixels < minScrollExtent) {
                 if (pixels + correction >= minScrollExtent) {
-                  if (!atSnapPoint) {
+                  if (!canScroll) {
                     correctPixels(minScrollExtent);
                   }
                   scrollAreaTracker.reset();
                   break;
                 }
-                if (!atSnapPoint) {
+                if (!canScroll) {
                   correctBy(correction);
                   scrollAreaTracker.reset();
                   break;
                 }
               } else {
                 if (pixels - correction <= maxScrollExtent) {
-                  if (!atSnapPoint) {
+                  if (!canScroll) {
                     correctPixels(maxScrollExtent);
                   }
                   scrollAreaTracker.reset();
                   break;
                 }
-                if (!atSnapPoint) {
+                if (!canScroll) {
                   correctBy(-correction);
                   scrollAreaTracker.reset();
                   break;
                 }
               }
-            } else if (!atSnapPoint) {
+            } else if (!canScroll) {
               final correction = !axisDirection.reverse ? dy : -dy;
               final newPixels = pixels + correction;
               if (newPixels < minScrollExtent) {

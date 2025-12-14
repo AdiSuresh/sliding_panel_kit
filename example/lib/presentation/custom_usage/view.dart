@@ -27,8 +27,7 @@ class _CustomUsageExampleState extends State<CustomUsageExample> {
             SlidingPanelBuilder(
               controller: controller,
               snapConfig: SlidingPanelSnapConfig(
-                // extents: [0.75],
-                includeBoundaryExtents: false,
+                extents: [0.75],
                 velocityRange: (400, 2400),
                 animation: SpringSnapAnimation.fixed(
                   SpringDescription(mass: 1, stiffness: 350, damping: 30),
