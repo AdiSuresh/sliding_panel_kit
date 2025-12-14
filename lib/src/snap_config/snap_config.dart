@@ -3,6 +3,7 @@ import 'package:sliding_panel_kit/src/snap_animation/snap_animation.dart';
 
 final class SlidingPanelSnapConfig {
   final List<double> _extents;
+  final bool includeBoundaryExtents;
   final (double lower, double upper) velocityRange;
   final SnapAnimation animation;
 
@@ -12,6 +13,7 @@ final class SlidingPanelSnapConfig {
 
   SlidingPanelSnapConfig({
     List<double> extents = const [],
+    this.includeBoundaryExtents = true,
     this.velocityRange = (500, 2500),
     this.animation = const CurvedSnapAnimation(),
   }) : _extents = List.of(extents, growable: false)..sort(),
@@ -37,6 +39,9 @@ final class SlidingPanelSnapConfig {
   }
 
   (int, double) findNearestExtent(double current) {
+    if (extents case []) {
+      return (-1, current);
+    }
     return extents.indexed.reduce((e1, e2) {
       final (_, a) = e1;
       final (_, b) = e2;
@@ -47,6 +52,9 @@ final class SlidingPanelSnapConfig {
   double findNextExtent(double current, double velocity) {
     final (lower, upper) = velocityRange;
     final (index, extent) = findNearestExtent(current);
+    if (index case -1) {
+      return current;
+    }
     final maxExtentIndex = extents.length - 1;
     final ranges = [
       ((double.negativeInfinity, -upper), maxExtentIndex),

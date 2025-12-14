@@ -54,7 +54,11 @@ final class SlidingPanelBuilder extends StatefulWidget {
     double minExtent,
     double maxExtent,
   ) {
-    final snapPoints = {minExtent, maxExtent, ...?snapConfig?.extents}.toList();
+    final boundaryExtents = switch (snapConfig?.includeBoundaryExtents) {
+      true => [minExtent, maxExtent],
+      _ => <double>[],
+    };
+    final snapPoints = {...boundaryExtents, ...?snapConfig?.extents}.toList();
     assert(
       snapPoints.every((e) => e >= minExtent && e <= maxExtent),
       'All snap points must be between $minExtent and $maxExtent inclusive.',
