@@ -1,5 +1,6 @@
 import 'package:example/presentation/basic_usage/route.dart';
 import 'package:example/presentation/custom_usage/route.dart';
+import 'package:example/presentation/nested_scroll/route.dart';
 import 'package:example/presentation/parallax_effect/route.dart';
 import 'package:flutter/material.dart';
 
@@ -33,6 +34,13 @@ class _HomePageState extends State<HomePage> {
           ),
           ListTile(
             leading: Text('3.'),
+            title: Text('Nested Scroll'),
+            onTap: () {
+              const NestedScrollRoute().go(context);
+            },
+          ),
+          ListTile(
+            leading: Text('4.'),
             title: Text('Parallax Effect'),
             onTap: () {
               const ParallaxEffectRoute().go(context);
