@@ -32,6 +32,10 @@ class _CustomUsageExampleState extends State<CustomUsageExample> {
                 animation: SpringSnapAnimation.fixed(
                   SpringDescription(mass: 1, stiffness: 350, damping: 30),
                 ),
+                // other options:
+                // SpringSnapAnimation()
+                // SpringSnapAnimation.adaptive()
+                // CurvedSnapAnimation()
               ),
               handle: const SlidingPanelHandle(),
               builder: (context, handle) {
