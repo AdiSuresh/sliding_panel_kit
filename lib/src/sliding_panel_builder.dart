@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sliding_panel_kit/src/extent/extent.dart';
 import 'package:sliding_panel_kit/src/snap_animation/snap_animation.dart';
@@ -85,6 +86,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
   double snapPoint = 0.0;
 
+  final pointerTracker = _PointerTracker();
   final scrollAreaTracker = _ScrollAreaTracker();
   VelocityTracker? velocityTracker;
 
@@ -234,6 +236,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
   @override
   Widget build(BuildContext context) {
+    final viewId = View.of(context).viewId;
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         final ScrollNotification(:metrics, :context) = notification;
@@ -245,6 +248,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         switch (notification) {
           case ScrollStartNotification():
             scrollAreaTracker.update(context.findRect());
+            pointerTracker.exceed();
             break;
 
           case ScrollUpdateNotification(:final dragDetails):
@@ -256,7 +260,6 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
             ].contains(controller.value);
 
             if (dragDetails == null) {
-              scrollAreaTracker.reset();
               if (!canScroll) {
                 position.correctBy(-(notification.scrollDelta ?? 0.0));
                 position.hold(() {}).cancel();
@@ -325,14 +328,20 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
           case UserScrollNotification(direction: != .idle):
             break;
 
+          case OverscrollNotification():
+            scrollAreaTracker.reset();
+            break;
+
           case _:
             scrollAreaTracker.reset();
+            pointerTracker.reset();
         }
 
         return false;
       },
       child: Listener(
         onPointerDown: (event) {
+          pointerTracker.start(context, event);
           velocityTracker = VelocityTracker.withKind(event.kind);
           drag(event.delta.dy);
         },
@@ -342,10 +351,19 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
           }
 
           velocityTracker?.addPosition(event.timeStamp, event.position);
+
+          if (!pointerTracker.update(viewId, event)) {
+            return;
+          }
+
           drag(event.delta.dy);
         },
         onPointerUp: (event) {
-          snap();
+          pointerTracker.reset();
+          if (!scrollAreaTracker.contains(event.position)) {
+            snap();
+          }
+          scrollAreaTracker.reset();
         },
         child: ValueListenableBuilder<double>(
           valueListenable: controller,
@@ -396,6 +414,52 @@ extension on AxisDirection {
       return true;
     }
     return false;
+  }
+}
+
+final class _PointerTracker {
+  static const maxDistance = kTouchSlop + 1e-6;
+
+  double _distance = 0.0;
+
+  _PointerTracker();
+
+  bool isOverScrollable(BuildContext context, Offset position) {
+    final view = View.of(context);
+    final result = HitTestResult();
+
+    WidgetsBinding.instance.hitTestInView(result, position, view.viewId);
+
+    for (final entry in result.path) {
+      if (entry.target case RenderAbstractViewport()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void start(BuildContext context, PointerDownEvent event) {
+    if (isOverScrollable(context, event.position)) {
+      return;
+    }
+    exceed();
+  }
+
+  bool update(int viewId, PointerMoveEvent event) {
+    if (_distance >= maxDistance) {
+      return true;
+    }
+    _distance += event.delta.distance;
+    return false;
+  }
+
+  void exceed() {
+    _distance = maxDistance;
+  }
+
+  void reset() {
+    _distance = 0.0;
   }
 }
 
