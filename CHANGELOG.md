@@ -1,6 +1,7 @@
 ## 0.1.1
 ### Added
 - Support for controlling whether to use `minExtent` and `maxExtent` as snap points via `includeBoundaryExtents`.
+- Support for scroll coordination for vertical scroll views inside horizontal scrollables.
 
 
 ## 0.1.0
