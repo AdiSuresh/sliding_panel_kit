@@ -245,17 +245,42 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
           return false;
         }
 
-        switch (notification) {
-          case ScrollStartNotification():
-            scrollAreaTracker.update(context.findRect());
-            pointerTracker.exceed();
-            break;
+        final canScroll = [
+          widget.minExtent,
+          snapPoint,
+          widget.maxExtent,
+        ].contains(controller.value);
 
-          case UserScrollNotification(direction: .idle) ||
-              ScrollEndNotification():
-            scrollAreaTracker.reset();
-            pointerTracker.reset();
-            break;
+        if (canScroll) {
+          switch (notification) {
+            case ScrollStartNotification():
+              scrollAreaTracker.update(context.findRect());
+              pointerTracker.exceed();
+              break;
+
+            case UserScrollNotification(direction: .idle) ||
+                ScrollEndNotification():
+              scrollAreaTracker.reset();
+              pointerTracker.reset();
+              break;
+
+            case _:
+          }
+        } else {
+          switch (notification) {
+            case ScrollUpdateNotification(:final dragDetails)
+                when !metrics.outOfRange:
+              final dx = dragDetails?.delta.dx;
+
+              if (dx != null) {
+                final position = Scrollable.of(context).position;
+                position.correctBy(dx);
+              }
+
+              break;
+
+            case _:
+          }
         }
 
         return false;
@@ -269,7 +294,10 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
           }
 
           switch (notification) {
-            case ScrollStartNotification():
+            case ScrollStartNotification(:final dragDetails):
+              if (dragDetails == null) {
+                break;
+              }
               scrollAreaTracker.update(context.findRect());
               pointerTracker.exceed();
               break;
