@@ -190,6 +190,7 @@ For the complete example, see [`basic_usage/view.dart`](https://github.com/AdiSu
 
 Here are some other examples:
 - [`Spring-based snapping`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/custom_usage/view.dart)
+- [`Nested scroll`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/nested_scroll/view.dart)
 - [`Parallax effect`](https://github.com/AdiSuresh/sliding_panel_kit/blob/master/example/lib/presentation/parallax_effect/view.dart)
 
 
