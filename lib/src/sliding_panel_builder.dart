@@ -47,10 +47,10 @@ final class SlidingPanelBuilder extends StatefulWidget {
          'Initial extent must be between $minExtent and $maxExtent inclusive.',
        ),
        initialExtent = initialExtent ?? minExtent,
-       snapConfig = _processSnapPointsArg(snapConfig, minExtent, maxExtent),
+       snapConfig = _processSnapConfig(snapConfig, minExtent, maxExtent),
        _handleHeight = handle?.preferredSize.height ?? 0.0;
 
-  static SlidingPanelSnapConfig _processSnapPointsArg(
+  static SlidingPanelSnapConfig _processSnapConfig(
     SlidingPanelSnapConfig? snapConfig,
     double minExtent,
     double maxExtent,
@@ -96,12 +96,6 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
   double get velocity {
     return velocityTracker?.getVelocity().pixelsPerSecond.dy ?? 0;
-  }
-
-  bool get atEdge {
-    final value = controller.value;
-    final SlidingPanelBuilder(:minExtent, :maxExtent) = widget;
-    return value == minExtent || value == maxExtent;
   }
 
   @override
@@ -194,8 +188,6 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
     final SlidingPanelBuilder(:minExtent, :maxExtent) = widget;
 
-    final snapToEdge = snapPoint == minExtent || snapPoint == maxExtent;
-
     final extentDiff = (snapPoint - extent).abs();
     final maxPixels = controller.maxPixels - widget._handleHeight;
     final pixels = extentDiff * maxPixels;
@@ -214,7 +206,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         final speed = velocity.abs().clamp(1.0, maxSpeed);
         await controller.animateWith(
           SpringSimulation(
-            switch (snapToEdge) {
+            switch (snapPoint == minExtent || snapPoint == maxExtent) {
               true => .withDurationAndBounce(
                 duration: spring.duration,
                 bounce: 0,
