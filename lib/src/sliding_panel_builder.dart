@@ -56,8 +56,8 @@ final class SlidingPanelBuilder extends StatefulWidget {
     double maxExtent,
   ) {
     final boundaryExtents = switch (snapConfig?.includeBoundaryExtents) {
-      true => [minExtent, maxExtent],
-      _ => <double>[],
+      false => <double>[],
+      _ => [minExtent, maxExtent],
     };
     final snapPoints = {...boundaryExtents, ...?snapConfig?.extents}.toList();
     assert(
@@ -193,10 +193,10 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     final pixels = extentDiff * maxPixels;
 
     switch (animation) {
-      case CurvedSnapAnimation(:final curve, evaluate: final findDuration):
+      case CurvedSnapAnimation(:final curve, :final evaluate):
         await controller.animateTo(
           snapPoint,
-          duration: findDuration(pixels, velocity),
+          duration: evaluate(pixels, velocity),
           curve: curve,
         );
 
@@ -444,9 +444,9 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
 extension on BuildContext {
   Rect findRect() {
-    final renderObject = findRenderObject() as RenderBox;
-    final offset = renderObject.localToGlobal(Offset.zero);
-    final size = renderObject.size;
+    final box = findRenderObject() as RenderBox;
+    final offset = box.localToGlobal(Offset.zero);
+    final size = box.size;
 
     return Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
   }
