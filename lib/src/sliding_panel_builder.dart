@@ -81,6 +81,9 @@ final class SlidingPanelBuilder extends StatefulWidget {
 
 final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     with SingleTickerProviderStateMixin {
+  final childKey = GlobalKey();
+  Size? childSize;
+
   final _controller = SlidingPanelController();
   late final AnimationController animationController;
 
@@ -107,6 +110,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     animationController = AnimationController(vsync: this);
     controller._attach(animationController);
     snapPoint = widget.initialExtent;
+
+    updateChildSize();
   }
 
   @override
@@ -155,6 +160,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
       controller._extent = newExtent;
       snap();
     }
+
+    updateChildSize();
   }
 
   @override
@@ -162,6 +169,29 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     animationController.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  void updateChildSize({bool notify = false}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      switch (childKey.currentContext?.findSize()) {
+        case null:
+          return;
+
+        case final value when value != childSize:
+          childSize = value;
+          final extent = controller.value;
+          const delta = 1e-9;
+          switch (extent) {
+            case 1:
+              controller.jumpTo(extent - delta);
+              controller.jumpTo(extent);
+              break;
+            case final value:
+              controller.jumpTo(value + delta);
+              controller.jumpTo(value);
+          }
+      }
+    });
   }
 
   void drag(double dy) {
@@ -411,30 +441,53 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
           child: ValueListenableBuilder<double>(
             valueListenable: controller,
             builder: (context, value, child) {
+              print('value: $value');
               return LayoutBuilder(
                 builder: (context, constraints) {
-                  final availablePixels = constraints.biggest.height;
+                  final size = childSize;
+
+                  final offstage = size == null;
+
+                  final availablePixels = size?.height ?? 0;
 
                   controller._availablePixels = availablePixels;
 
-                  final maxHeight = availablePixels * widget.maxExtent;
-                  final minHeight = availablePixels * widget.minExtent;
+                  final contentPixels = availablePixels - widget._handleHeight;
+                  final minContentPixels = contentPixels * widget.minExtent;
 
-                  final travel = (maxHeight - minHeight) - widget._handleHeight;
+                  final travel = contentPixels - minContentPixels;
 
                   final dy = (1 - controller.normalizedValue) * travel;
 
-                  return Transform.translate(
-                    offset: Offset(0, dy),
-                    child: ConstrainedBox(
-                      constraints: constraints.copyWith(maxHeight: maxHeight),
-                      child: child,
+                  print('dy: $dy');
+                  print('dy fraction: ${(contentPixels - dy) / contentPixels}');
+
+                  return Offstage(
+                    offstage: offstage,
+                    child: Transform.translate(
+                      offset: Offset(0, dy),
+                      child: Align(
+                        alignment: .bottomCenter,
+                        child: ConstrainedBox(
+                          constraints: constraints,
+                          child: child,
+                        ),
+                      ),
                     ),
                   );
                 },
               );
             },
-            child: widget.builder(context, widget.handle),
+            child: NotificationListener<SizeChangedLayoutNotification>(
+              onNotification: (notification) {
+                updateChildSize();
+                return false;
+              },
+              child: SizeChangedLayoutNotifier(
+                key: childKey,
+                child: widget.builder(context, widget.handle),
+              ),
+            ),
           ),
         ),
       ),
@@ -443,8 +496,16 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 }
 
 extension on BuildContext {
+  RenderBox get _box {
+    return findRenderObject() as RenderBox;
+  }
+
+  Size findSize() {
+    return _box.size;
+  }
+
   Rect findRect() {
-    final box = findRenderObject() as RenderBox;
+    final box = _box;
     final offset = box.localToGlobal(Offset.zero);
     final size = box.size;
 
