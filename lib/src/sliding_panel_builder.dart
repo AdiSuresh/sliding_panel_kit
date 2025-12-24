@@ -3,14 +3,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:sliding_panel_kit/src/extent/extent.dart';
 import 'package:sliding_panel_kit/src/snap_animation/snap_animation.dart';
 import 'package:sliding_panel_kit/src/snap_config/snap_config.dart';
 
 final class SlidingPanelBuilder extends StatefulWidget {
   final SlidingPanelController? controller;
   final double minExtent;
-  final double maxExtent;
   final double initialExtent;
   final SlidingPanelSnapConfig snapConfig;
   final PreferredSizeWidget? handle;
@@ -22,7 +20,6 @@ final class SlidingPanelBuilder extends StatefulWidget {
     super.key,
     this.controller,
     this.minExtent = 0.0,
-    this.maxExtent = 1.0,
     double? initialExtent,
     SlidingPanelSnapConfig? snapConfig,
     this.handle,
@@ -31,48 +28,32 @@ final class SlidingPanelBuilder extends StatefulWidget {
          minExtent >= 0 && minExtent <= 1,
          'Minimum extent must be between 0.0 and 1.0 inclusive.',
        ),
-       assert(
-         maxExtent >= 0 && maxExtent <= 1,
-         'Maximum extent must be between 0.0 and 1.0 inclusive.',
-       ),
-       assert(
-         minExtent <= maxExtent,
-         'Minimum extent cannot be greater than maximum extent.',
-       ),
-       assert(
-         switch (initialExtent) {
-           null => true,
-           final value => value >= minExtent && value <= maxExtent,
-         },
-         'Initial extent must be between $minExtent and $maxExtent inclusive.',
-       ),
+       assert(switch (initialExtent) {
+         null => true,
+         final value => value >= minExtent && value <= 1,
+       }, 'Initial extent must be between $minExtent and 1.0 inclusive.'),
        initialExtent = initialExtent ?? minExtent,
-       snapConfig = _processSnapConfig(snapConfig, minExtent, maxExtent),
+       snapConfig = _processSnapConfig(snapConfig, minExtent),
        _handleHeight = handle?.preferredSize.height ?? 0.0;
 
   static SlidingPanelSnapConfig _processSnapConfig(
     SlidingPanelSnapConfig? snapConfig,
     double minExtent,
-    double maxExtent,
   ) {
     final boundaryExtents = switch (snapConfig?.includeBoundaryExtents) {
       false => <double>[],
-      _ => [minExtent, maxExtent],
+      _ => [minExtent, 1.0],
     };
     final snapPoints = {...boundaryExtents, ...?snapConfig?.extents}.toList();
     assert(
-      snapPoints.every((e) => e >= minExtent && e <= maxExtent),
-      'All snap points must be between $minExtent and $maxExtent inclusive.',
+      snapPoints.every((e) => e >= minExtent && e <= 1),
+      'All snap points must be between $minExtent and 1.0 inclusive.',
     );
     snapPoints.sort();
     return switch (snapConfig) {
       null => SlidingPanelSnapConfig(extents: snapPoints),
       _ => snapConfig.copyWith(extents: snapPoints),
     };
-  }
-
-  SlidingPanelExtent get _extent {
-    return SlidingPanelExtent(minExtent: minExtent, maxExtent: maxExtent);
   }
 
   @override
@@ -105,7 +86,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
   void initState() {
     super.initState();
     controller
-      .._extent = widget._extent
+      .._minExtent = widget.minExtent
       ..value = widget.initialExtent;
     animationController = AnimationController(vsync: this);
     controller._attach(animationController);
@@ -148,8 +129,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         newController._attach(animationController);
     }
 
-    final newExtent = widget._extent;
-    final extentChanged = oldWidget._extent != newExtent;
+    final newExtent = widget.minExtent;
+    final extentChanged = oldWidget.minExtent != newExtent;
 
     final snapPointsChanged = !listEquals(
       oldWidget.snapConfig.extents,
@@ -157,7 +138,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     );
 
     if (extentChanged || snapPointsChanged) {
-      controller._extent = newExtent;
+      controller._minExtent = newExtent;
       snap();
     }
 
@@ -195,11 +176,11 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
   }
 
   void drag(double dy) {
-    final pixels = controller.maxPixels - widget._handleHeight;
+    final pixels = controller.pixels - widget._handleHeight;
     if (pixels case 0) {
       return;
     }
-    controller.jumpTo(controller.value - dy * widget.maxExtent / pixels);
+    controller.jumpTo(controller.value - dy / pixels);
   }
 
   Future<void> snap() async {
@@ -216,10 +197,10 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
       return;
     }
 
-    final SlidingPanelBuilder(:minExtent, :maxExtent) = widget;
+    final SlidingPanelBuilder(:minExtent) = widget;
 
     final extentDiff = (snapPoint - extent).abs();
-    final maxPixels = controller.maxPixels - widget._handleHeight;
+    final maxPixels = controller.pixels - widget._handleHeight;
     final pixels = extentDiff * maxPixels;
 
     switch (animation) {
@@ -236,7 +217,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         final speed = velocity.abs().clamp(1.0, maxSpeed);
         await controller.animateWith(
           SpringSimulation(
-            switch (snapPoint == minExtent || snapPoint == maxExtent) {
+            switch (snapPoint == minExtent || snapPoint == 1) {
               true => .withDurationAndBounce(
                 duration: spring.duration,
                 bounce: 0,
@@ -270,7 +251,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         final canScroll = [
           widget.minExtent,
           snapPoint,
-          widget.maxExtent,
+          1.0,
         ].contains(controller.value);
 
         if (canScroll) {
@@ -329,7 +310,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
               final canScroll = [
                 widget.minExtent,
                 snapPoint,
-                widget.maxExtent,
+                1.0,
               ].contains(controller.value);
 
               if (dragDetails == null) {
@@ -441,26 +422,22 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
           child: ValueListenableBuilder<double>(
             valueListenable: controller,
             builder: (context, value, child) {
-              print('value: $value');
               return LayoutBuilder(
                 builder: (context, constraints) {
                   final size = childSize;
 
                   final offstage = size == null;
 
-                  final availablePixels = size?.height ?? 0;
+                  final pixels = size?.height ?? 0;
 
-                  controller._availablePixels = availablePixels;
+                  controller._pixels = pixels;
 
-                  final contentPixels = availablePixels - widget._handleHeight;
+                  final contentPixels = pixels - widget._handleHeight;
                   final minContentPixels = contentPixels * widget.minExtent;
 
                   final travel = contentPixels - minContentPixels;
 
                   final dy = (1 - controller.normalizedValue) * travel;
-
-                  print('dy: $dy');
-                  print('dy fraction: ${(contentPixels - dy) / contentPixels}');
 
                   return Offstage(
                     offstage: offstage,
@@ -591,29 +568,26 @@ final class _ScrollAreaTracker {
 final class SlidingPanelController extends ValueNotifier<double> {
   AnimationController? _animationController;
 
-  SlidingPanelExtent _extent = const SlidingPanelExtent();
-  double? _availablePixels;
+  double _minExtent = 0.0;
+
+  double? _pixels;
 
   SlidingPanelController() : super(0.0);
 
-  double get availablePixels => _availablePixels!;
-
-  double get pixels => value * availablePixels;
-
-  double get maxPixels => _extent.maxExtent * availablePixels;
+  double get pixels => _pixels!;
 
   @override
   @protected
   set value(double newValue) {
-    super.value = newValue.clamp(_extent.minExtent, _extent.maxExtent);
+    super.value = newValue.clamp(_minExtent, 1.0);
   }
 
   double get normalizedValue {
-    final range = _extent.range;
+    final range = 1 - _minExtent;
     if (range == 0) {
       return 0;
     }
-    return (value - _extent.minExtent) / range;
+    return (value - _minExtent) / range;
   }
 
   @override
