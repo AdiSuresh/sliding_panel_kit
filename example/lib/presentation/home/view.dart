@@ -1,7 +1,7 @@
 import 'package:example/presentation/basic_usage/route.dart';
 import 'package:example/presentation/custom_usage/route.dart';
 import 'package:example/presentation/nested_scroll/route.dart';
-import 'package:example/presentation/content_driven_sizing/route.dart';
+import 'package:example/presentation/adaptive_sizing/route.dart';
 import 'package:example/presentation/parallax_effect/route.dart';
 import 'package:flutter/material.dart';
 
@@ -42,9 +42,9 @@ class _HomePageState extends State<HomePage> {
           ),
           ListTile(
             leading: Text('4.'),
-            title: Text('Non-scrollable'),
+            title: Text('Adaptive Sizing'),
             onTap: () {
-              const ContentDrivenSizingRoute().go(context);
+              const AdaptiveSizingRoute().go(context);
             },
           ),
           ListTile(

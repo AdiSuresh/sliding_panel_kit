@@ -3,16 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:sliding_panel_kit/sliding_panel_kit.dart';
 
-class ContentDrivenSizingExample extends StatefulWidget {
-  const ContentDrivenSizingExample({super.key});
+class AdaptiveSizingExample extends StatefulWidget {
+  const AdaptiveSizingExample({super.key});
 
   @override
-  State<ContentDrivenSizingExample> createState() =>
-      _ContentDrivenSizingExampleState();
+  State<AdaptiveSizingExample> createState() => _AdaptiveSizingExampleState();
 }
 
-class _ContentDrivenSizingExampleState
-    extends State<ContentDrivenSizingExample> {
+class _AdaptiveSizingExampleState extends State<AdaptiveSizingExample> {
   static const initialSize = 250.0;
 
   final controller = SlidingPanelController();

@@ -30,7 +30,7 @@ RouteBase get $homeRoute => GoRouteData.$route(
     ),
     GoRouteData.$route(
       path: '/non-scrollable',
-      factory: $ContentDrivenSizingRoute._fromState,
+      factory: $AdaptiveSizingRoute._fromState,
     ),
   ],
 );
@@ -139,9 +139,9 @@ mixin $ParallaxEffectRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $ContentDrivenSizingRoute on GoRouteData {
-  static ContentDrivenSizingRoute _fromState(GoRouterState state) =>
-      const ContentDrivenSizingRoute();
+mixin $AdaptiveSizingRoute on GoRouteData {
+  static AdaptiveSizingRoute _fromState(GoRouterState state) =>
+      const AdaptiveSizingRoute();
 
   @override
   String get location => GoRouteData.$location('/non-scrollable');
