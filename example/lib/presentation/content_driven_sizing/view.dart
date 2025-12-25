@@ -17,14 +17,15 @@ class _ContentDrivenSizingExampleState
 
   final controller = SlidingPanelController();
 
+  final random = Random();
+  final dimension = ValueNotifier(initialSize);
+
   @override
   void dispose() {
     controller.dispose();
+    dimension.dispose();
     super.dispose();
   }
-
-  final random = Random();
-  double dimension = initialSize;
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +38,7 @@ class _ContentDrivenSizingExampleState
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      dimension = initialSize + random.nextDouble() * 100;
-                    });
+                    dimension.value = initialSize + random.nextDouble() * 100;
                   },
                   child: Text('Update Size'),
                 ),
@@ -49,23 +48,32 @@ class _ContentDrivenSizingExampleState
               controller: controller,
               handle: const SlidingPanelHandle(),
               snapConfig: SlidingPanelSnapConfig(
-                extents: [.75],
+                extents: [0.75],
                 animation: SpringSnapAnimation(),
               ),
               builder: (context, handle) {
-                return SlidingPanelBody(
-                  child: Column(
-                    mainAxisSize: .min,
-                    children: [
-                      ?handle,
-                      AnimatedContainer(
-                        duration: Duration(milliseconds: 150),
-                        constraints: BoxConstraints.tight(
-                          Size.square(dimension),
+                return FractionallySizedBox(
+                  widthFactor: 1,
+                  child: SlidingPanelBody(
+                    child: Column(
+                      mainAxisSize: .min,
+                      children: [
+                        ?handle,
+                        ValueListenableBuilder(
+                          valueListenable: dimension,
+                          builder: (context, value, child) {
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              constraints: BoxConstraints.tight(
+                                Size.square(value),
+                              ),
+                              child: child,
+                            );
+                          },
+                          child: const ColoredBox(color: Colors.blue),
                         ),
-                        child: ColoredBox(color: Colors.blue),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               },

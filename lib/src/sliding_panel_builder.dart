@@ -87,7 +87,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     super.initState();
     controller
       .._minExtent = widget.minExtent
-      ..value = widget.initialExtent;
+      ..extent = widget.initialExtent;
     animationController = AnimationController(vsync: this);
     controller._attach(animationController);
     snapPoint = widget.initialExtent;
@@ -107,12 +107,12 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         break;
 
       case (null, final SlidingPanelController newController):
-        newController.value = _controller.value;
+        newController.extent = _controller.extent;
         _controller._detach();
         newController._attach(animationController);
 
       case (final SlidingPanelController oldController, null):
-        _controller.value = oldController.value;
+        _controller.extent = oldController.extent;
         oldController._detach();
         _controller._attach(animationController);
 
@@ -124,7 +124,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
         final SlidingPanelController oldController,
         final SlidingPanelController newController,
       ):
-        newController.value = oldController.value;
+        newController.extent = oldController.extent;
         oldController._detach();
         newController._attach(animationController);
     }
@@ -160,31 +160,21 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
 
         case final value when value != childSize:
           childSize = value;
-          final extent = controller.value;
-          const delta = 1e-9;
-          switch (extent) {
-            case 1:
-              controller.jumpTo(extent - delta);
-              controller.jumpTo(extent);
-              break;
-            case final value:
-              controller.jumpTo(value + delta);
-              controller.jumpTo(value);
-          }
+          controller._updateDimensions(value);
       }
     });
   }
 
   void drag(double dy) {
-    final pixels = controller.pixels - widget._handleHeight;
+    final pixels = controller.dimensions.height - widget._handleHeight;
     if (pixels case 0) {
       return;
     }
-    controller.jumpTo(controller.value - dy / pixels);
+    controller.jumpTo(controller.extent - dy / pixels);
   }
 
   Future<void> snap() async {
-    final extent = controller.value;
+    final extent = controller.extent;
     final velocity = this.velocity;
 
     final SlidingPanelSnapConfig(:findNextExtent, :animation) =
@@ -200,7 +190,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     final SlidingPanelBuilder(:minExtent) = widget;
 
     final extentDiff = (snapPoint - extent).abs();
-    final maxPixels = controller.pixels - widget._handleHeight;
+    final maxPixels = controller.dimensions.height - widget._handleHeight;
     final pixels = extentDiff * maxPixels;
 
     switch (animation) {
@@ -252,7 +242,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
           widget.minExtent,
           snapPoint,
           1.0,
-        ].contains(controller.value);
+        ].contains(controller.extent);
 
         if (canScroll) {
           switch (notification) {
@@ -311,7 +301,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
                 widget.minExtent,
                 snapPoint,
                 1.0,
-              ].contains(controller.value);
+              ].contains(controller.extent);
 
               if (dragDetails == null) {
                 if (!canScroll) {
@@ -419,28 +409,24 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
             }
             scrollAreaTracker.reset();
           },
-          child: ValueListenableBuilder<double>(
-            valueListenable: controller,
-            builder: (context, value, child) {
+          child: AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) {
               return LayoutBuilder(
                 builder: (context, constraints) {
-                  final size = childSize;
+                  final dimensions = childSize;
 
-                  final offstage = size == null;
-
-                  final pixels = size?.height ?? 0;
-
-                  controller._pixels = pixels;
+                  final pixels = dimensions?.height ?? 0.0;
 
                   final contentPixels = pixels - widget._handleHeight;
                   final minContentPixels = contentPixels * widget.minExtent;
 
                   final travel = contentPixels - minContentPixels;
 
-                  final dy = (1 - controller.normalizedValue) * travel;
+                  final dy = (1 - controller.normalizedExtent) * travel;
 
                   return Offstage(
-                    offstage: offstage,
+                    offstage: dimensions == null,
                     child: Transform.translate(
                       offset: Offset(0, dy),
                       child: Align(
@@ -565,29 +551,46 @@ final class _ScrollAreaTracker {
   }
 }
 
-final class SlidingPanelController extends ValueNotifier<double> {
-  AnimationController? _animationController;
-
+final class SlidingPanelController extends ChangeNotifier {
+  double _extent;
   double _minExtent = 0.0;
 
-  double? _pixels;
+  Size? _dimensions;
 
-  SlidingPanelController() : super(0.0);
+  AnimationController? _animationController;
 
-  double get pixels => _pixels!;
+  SlidingPanelController([this._extent = 0.0]);
 
-  @override
-  @protected
-  set value(double newValue) {
-    super.value = newValue.clamp(_minExtent, 1.0);
+  Size get dimensions => _dimensions!;
+
+  double get extent {
+    return _extent;
   }
 
-  double get normalizedValue {
+  @protected
+  set extent(double newExtent) {
+    newExtent = newExtent.clamp(_minExtent, 1.0);
+    if (newExtent == _extent) {
+      return;
+    }
+    _extent = newExtent;
+    notifyListeners();
+  }
+
+  void _updateDimensions(Size? newDimensions) {
+    if (newDimensions == _dimensions) {
+      return;
+    }
+    _dimensions = newDimensions;
+    notifyListeners();
+  }
+
+  double get normalizedExtent {
     final range = 1 - _minExtent;
     if (range == 0) {
-      return 0;
+      return 1;
     }
-    return (value - _minExtent) / range;
+    return (_extent - _minExtent) / range;
   }
 
   @override
@@ -600,7 +603,7 @@ final class SlidingPanelController extends ValueNotifier<double> {
     _animationController
       ?..stop()
       ..removeListener(_onTick);
-    value = extent;
+    this.extent = extent;
   }
 
   Future<void> animateTo(
@@ -644,7 +647,7 @@ final class SlidingPanelController extends ValueNotifier<double> {
   void _prepareForAnimation() {
     _animationController
       ?..stop()
-      ..value = value
+      ..value = _extent
       ..addListener(_onTick);
   }
 
@@ -659,7 +662,7 @@ final class SlidingPanelController extends ValueNotifier<double> {
 
   void _onTick() {
     if (_animationController?.value case final double value) {
-      this.value = value;
+      extent = value;
     }
   }
 }

@@ -9,11 +9,11 @@ class ParallaxEffectExample extends StatefulWidget {
 }
 
 class _ParallaxEffectExampleState extends State<ParallaxEffectExample> {
-  final panelCtrl = SlidingPanelController();
+  final controller = SlidingPanelController();
 
   @override
   void dispose() {
-    panelCtrl.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -23,9 +23,9 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample> {
       body: Stack(
         children: [
           AnimatedBuilder(
-            animation: panelCtrl,
+            animation: controller,
             builder: (context, child) {
-              final progress = panelCtrl.normalizedValue;
+              final progress = controller.normalizedExtent;
               const pixels = 16;
               final offset = progress * pixels;
 
@@ -42,9 +42,9 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample> {
             ),
           ),
           AnimatedBuilder(
-            animation: panelCtrl,
+            animation: controller,
             builder: (context, child) {
-              final progress = panelCtrl.normalizedValue;
+              final progress = controller.normalizedExtent;
               final offset = progress * 64;
 
               return Transform.translate(
@@ -73,7 +73,7 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample> {
           ),
           SafeArea(
             child: SlidingPanelBuilder(
-              controller: panelCtrl,
+              controller: controller,
               snapConfig: SlidingPanelSnapConfig(
                 extents: [0.75],
                 animation: SpringSnapAnimation.fixed(
