@@ -46,7 +46,6 @@ class _AdaptiveSizingExampleState extends State<AdaptiveSizingExample> {
               controller: controller,
               handle: const SlidingPanelHandle(),
               snapConfig: SlidingPanelSnapConfig(
-                extents: [0.75],
                 animation: SpringSnapAnimation(),
               ),
               builder: (context, handle) {
