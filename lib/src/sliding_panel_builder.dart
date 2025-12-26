@@ -4,13 +4,14 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sliding_panel_kit/src/snap_animation/snap_animation.dart';
+import 'package:sliding_panel_kit/src/snap_behavior/snap_behavior.dart';
 import 'package:sliding_panel_kit/src/snap_config/snap_config.dart';
 
 final class SlidingPanelBuilder extends StatefulWidget {
   final SlidingPanelController? controller;
   final double minExtent;
   final double initialExtent;
-  final SnapConfig snapConfig;
+  final SnapBehavior _snapBehavior;
   final PreferredSizeWidget? handle;
   final Widget Function(BuildContext context, Widget? handle) builder;
 
@@ -33,10 +34,10 @@ final class SlidingPanelBuilder extends StatefulWidget {
          final value => value >= minExtent && value <= 1,
        }, 'Initial extent must be between $minExtent and 1.0 inclusive.'),
        initialExtent = initialExtent ?? minExtent,
-       snapConfig = _processSnapConfig(snapConfig, minExtent),
+       _snapBehavior = _processSnapBehavior(snapConfig, minExtent),
        _handleHeight = handle?.preferredSize.height ?? 0.0;
 
-  static SnapConfig _processSnapConfig(
+  static SnapBehavior _processSnapBehavior(
     SnapConfig? snapConfig,
     double minExtent,
   ) {
@@ -50,10 +51,12 @@ final class SlidingPanelBuilder extends StatefulWidget {
       'All snap points must be between $minExtent and 1.0 inclusive.',
     );
     snapPoints.sort();
-    return switch (snapConfig) {
-      null => SnapConfig(extents: snapPoints),
-      _ => snapConfig.copyWith(extents: snapPoints),
-    };
+    return SnapBehavior(
+      config: switch (snapConfig) {
+        null => SnapConfig(extents: snapPoints),
+        _ => snapConfig.copyWith(extents: snapPoints),
+      },
+    );
   }
 
   @override
@@ -133,8 +136,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     final extentChanged = oldWidget.minExtent != newExtent;
 
     final snapPointsChanged = !listEquals(
-      oldWidget.snapConfig.extents,
-      widget.snapConfig.extents,
+      oldWidget._snapBehavior.config.extents,
+      widget._snapBehavior.config.extents,
     );
 
     if (extentChanged || snapPointsChanged) {
@@ -177,7 +180,8 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     final extent = controller.extent;
     final velocity = this.velocity;
 
-    final SnapConfig(:findNextExtent, :animation) = widget.snapConfig;
+    final SnapBehavior(:findNextExtent, config: SnapConfig(:animation)) =
+        widget._snapBehavior;
 
     final snapPoint = findNextExtent(extent, velocity);
 
