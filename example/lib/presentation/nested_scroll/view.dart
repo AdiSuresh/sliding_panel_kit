@@ -29,7 +29,7 @@ class _NestedScrollExampleState extends State<NestedScrollExample>
     return Scaffold(
       body: SafeArea(
         child: SlidingPanelBuilder(
-          snapConfig: SlidingPanelSnapConfig(extents: [0.75]),
+          snapConfig: SnapConfig(extents: [0.75]),
           handle: const SlidingPanelHandle(),
           builder: (context, handle) {
             return SlidingPanelBody(

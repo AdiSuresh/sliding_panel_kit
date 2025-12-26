@@ -10,7 +10,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
   final SlidingPanelController? controller;
   final double minExtent;
   final double initialExtent;
-  final SlidingPanelSnapConfig snapConfig;
+  final SnapConfig snapConfig;
   final PreferredSizeWidget? handle;
   final Widget Function(BuildContext context, Widget? handle) builder;
 
@@ -21,7 +21,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
     this.controller,
     this.minExtent = 0.0,
     double? initialExtent,
-    SlidingPanelSnapConfig? snapConfig,
+    SnapConfig? snapConfig,
     this.handle,
     required this.builder,
   }) : assert(
@@ -36,8 +36,8 @@ final class SlidingPanelBuilder extends StatefulWidget {
        snapConfig = _processSnapConfig(snapConfig, minExtent),
        _handleHeight = handle?.preferredSize.height ?? 0.0;
 
-  static SlidingPanelSnapConfig _processSnapConfig(
-    SlidingPanelSnapConfig? snapConfig,
+  static SnapConfig _processSnapConfig(
+    SnapConfig? snapConfig,
     double minExtent,
   ) {
     final boundaryExtents = switch (snapConfig?.includeBoundaryExtents) {
@@ -51,7 +51,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
     );
     snapPoints.sort();
     return switch (snapConfig) {
-      null => SlidingPanelSnapConfig(extents: snapPoints),
+      null => SnapConfig(extents: snapPoints),
       _ => snapConfig.copyWith(extents: snapPoints),
     };
   }
@@ -177,8 +177,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
     final extent = controller.extent;
     final velocity = this.velocity;
 
-    final SlidingPanelSnapConfig(:findNextExtent, :animation) =
-        widget.snapConfig;
+    final SnapConfig(:findNextExtent, :animation) = widget.snapConfig;
 
     final snapPoint = findNextExtent(extent, velocity);
 

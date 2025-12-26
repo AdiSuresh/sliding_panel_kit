@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'package:sliding_panel_kit/src/snap_animation/snap_animation.dart';
 
-final class SlidingPanelSnapConfig {
+final class SnapConfig {
   final List<double> _extents;
   final bool includeBoundaryExtents;
   final (double lower, double upper) velocityRange;
@@ -11,7 +11,7 @@ final class SlidingPanelSnapConfig {
     return UnmodifiableListView(_extents);
   }
 
-  SlidingPanelSnapConfig({
+  SnapConfig({
     List<double> extents = const [],
     this.includeBoundaryExtents = true,
     this.velocityRange = (500, 2500),
@@ -26,12 +26,12 @@ final class SlidingPanelSnapConfig {
          return lower > 0 && upper > 0 && lower < upper;
        }(), 'Invalid snap velocity range was specified.');
 
-  SlidingPanelSnapConfig copyWith({
+  SnapConfig copyWith({
     List<double>? extents,
     (double lower, double upper)? velocityRange,
     SnapAnimation? animation,
   }) {
-    return SlidingPanelSnapConfig(
+    return SnapConfig(
       extents: extents ?? _extents,
       velocityRange: velocityRange ?? this.velocityRange,
       animation: animation ?? this.animation,

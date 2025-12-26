@@ -74,7 +74,7 @@ class _ParallaxEffectExampleState extends State<ParallaxEffectExample> {
           SafeArea(
             child: SlidingPanelBuilder(
               controller: controller,
-              snapConfig: SlidingPanelSnapConfig(
+              snapConfig: SnapConfig(
                 extents: [0.75],
                 animation: SpringSnapAnimation.fixed(
                   SpringDescription(mass: 1, stiffness: 350, damping: 30),

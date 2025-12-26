@@ -45,9 +45,7 @@ class _AdaptiveSizingExampleState extends State<AdaptiveSizingExample> {
             SlidingPanelBuilder(
               controller: controller,
               handle: const SlidingPanelHandle(),
-              snapConfig: SlidingPanelSnapConfig(
-                animation: SpringSnapAnimation(),
-              ),
+              snapConfig: SnapConfig(animation: SpringSnapAnimation()),
               builder: (context, handle) {
                 return FractionallySizedBox(
                   widthFactor: 1,
