@@ -41,8 +41,8 @@ final class SlidingPanelBuilder extends StatefulWidget {
     double minExtent,
   ) {
     final boundaryExtents = switch (snapConfig?.includeBoundaryExtents) {
-      false => <double>[],
-      _ => [minExtent, 1.0],
+      true => [minExtent, 1.0],
+      _ => <double>[],
     };
     final snapPoints = {...boundaryExtents, ...?snapConfig?.extents}.toList();
     assert(
