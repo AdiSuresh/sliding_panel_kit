@@ -1,3 +1,18 @@
+## 0.3.0
+### Breaking changes
+- Replaced available height based extent model with a more intuitive **content height based extent model**.
+  
+- Removed `maxExtent` in favor of the new content height based extent model.
+  - To size the panel relative to the available height, please check out the `FractionallySizedBox` widget.
+
+- Migrated `SlidingPanelController` to extend `ChangeNotifier`.
+  - Renamed:
+    - `value` to `extent`
+    - `normalizedValue` to `normalizedExtent`
+  - Replaced:
+    - `pixels` by `dimensions`
+
+
 ## 0.2.0
 ### Added
 - New `includeBoundaryExtents` flag to control whether `minExtent` and `maxExtent` are used as snap points.
