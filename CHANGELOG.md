@@ -1,3 +1,11 @@
+## 0.4.0
+### Added
+- New `transitionBuilder` callback for customizing the panel’s visual transition in response to extent changes.
+
+### Breaking changes
+- `SlidingPanelSnapConfig` has been renamed to `SnapConfig`.
+
+
 ## 0.3.0
 ### Breaking changes
 - Replaced available height based extent model with a more intuitive **content height based extent model**.
