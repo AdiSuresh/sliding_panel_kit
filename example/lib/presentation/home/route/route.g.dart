@@ -25,12 +25,16 @@ RouteBase get $homeRoute => GoRouteData.$route(
       factory: $NestedScrollRoute._fromState,
     ),
     GoRouteData.$route(
-      path: '/parallax-effect',
-      factory: $ParallaxEffectRoute._fromState,
+      path: '/adaptive-sizing',
+      factory: $AdaptiveSizingRoute._fromState,
     ),
     GoRouteData.$route(
-      path: '/non-scrollable',
-      factory: $AdaptiveSizingRoute._fromState,
+      path: '/transition-builder',
+      factory: $TransitionBuilderRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: '/parallax-effect',
+      factory: $ParallaxEffectRoute._fromState,
     ),
   ],
 );
@@ -118,12 +122,12 @@ mixin $NestedScrollRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $ParallaxEffectRoute on GoRouteData {
-  static ParallaxEffectRoute _fromState(GoRouterState state) =>
-      const ParallaxEffectRoute();
+mixin $AdaptiveSizingRoute on GoRouteData {
+  static AdaptiveSizingRoute _fromState(GoRouterState state) =>
+      const AdaptiveSizingRoute();
 
   @override
-  String get location => GoRouteData.$location('/parallax-effect');
+  String get location => GoRouteData.$location('/adaptive-sizing');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -139,12 +143,33 @@ mixin $ParallaxEffectRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $AdaptiveSizingRoute on GoRouteData {
-  static AdaptiveSizingRoute _fromState(GoRouterState state) =>
-      const AdaptiveSizingRoute();
+mixin $TransitionBuilderRoute on GoRouteData {
+  static TransitionBuilderRoute _fromState(GoRouterState state) =>
+      const TransitionBuilderRoute();
 
   @override
-  String get location => GoRouteData.$location('/non-scrollable');
+  String get location => GoRouteData.$location('/transition-builder');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ParallaxEffectRoute on GoRouteData {
+  static ParallaxEffectRoute _fromState(GoRouterState state) =>
+      const ParallaxEffectRoute();
+
+  @override
+  String get location => GoRouteData.$location('/parallax-effect');
 
   @override
   void go(BuildContext context) => context.go(location);
