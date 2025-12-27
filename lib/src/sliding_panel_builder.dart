@@ -7,6 +7,13 @@ import 'package:sliding_panel_kit/src/snap_animation/snap_animation.dart';
 import 'package:sliding_panel_kit/src/snap_behavior/snap_behavior.dart';
 import 'package:sliding_panel_kit/src/snap_config/snap_config.dart';
 
+typedef SlidingPanelTransitionBuilder =
+    Widget Function(
+      BuildContext context,
+      ({double value, double normalized}) extent,
+      Widget child,
+    );
+
 final class SlidingPanelBuilder extends StatefulWidget {
   final SlidingPanelController? controller;
   final double minExtent;
@@ -14,6 +21,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
   final SnapBehavior _snapBehavior;
   final PreferredSizeWidget? handle;
   final Widget Function(BuildContext context, Widget? handle) builder;
+  final SlidingPanelTransitionBuilder transitionBuilder;
 
   final double _handleHeight;
 
@@ -24,6 +32,7 @@ final class SlidingPanelBuilder extends StatefulWidget {
     double? initialExtent,
     SnapConfig? snapConfig,
     this.handle,
+    this.transitionBuilder = defaultTransitionBuilder,
     required this.builder,
   }) : assert(
          minExtent >= 0 && minExtent <= 1,
@@ -58,6 +67,12 @@ final class SlidingPanelBuilder extends StatefulWidget {
       },
     );
   }
+
+  static Widget defaultTransitionBuilder(
+    BuildContext context,
+    ({double value, double normalized}) extent,
+    Widget child,
+  ) => child;
 
   @override
   State<SlidingPanelBuilder> createState() => _SlidingPanelBuilderState();
@@ -434,9 +449,18 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
                       offset: Offset(0, dy),
                       child: Align(
                         alignment: .bottomCenter,
-                        child: ConstrainedBox(
-                          constraints: constraints,
-                          child: child,
+                        child: RepaintBoundary(
+                          child: widget.transitionBuilder(
+                            context,
+                            (
+                              value: controller._extent,
+                              normalized: controller.normalizedExtent,
+                            ),
+                            ConstrainedBox(
+                              constraints: constraints,
+                              child: child,
+                            ),
+                          ),
                         ),
                       ),
                     ),
