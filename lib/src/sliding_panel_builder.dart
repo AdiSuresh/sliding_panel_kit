@@ -471,7 +471,7 @@ final class _SlidingPanelBuilderState extends State<SlidingPanelBuilder>
             child: NotificationListener<SizeChangedLayoutNotification>(
               onNotification: (notification) {
                 updateChildSize();
-                return false;
+                return true;
               },
               child: SizeChangedLayoutNotifier(
                 key: childKey,
