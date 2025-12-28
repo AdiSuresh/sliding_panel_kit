@@ -13,22 +13,23 @@ A simple and lightweight solution for building sliding-up panels for Flutter wit
 - Easily build panels that slides up from the bottom of the screen.
 - Includes optional widgets like `SlidingPanelHandle` and `SlidingPanelBody`.
 
-**Optional controller**
-
-- Panel works with or without a controller.
-- Use a controller only when you need to programmatically control the panel.
-
 **Drag from anywhere**
 - The entire panel surface is draggable by default.
 - Add a drag handle for visual guidance if desired.
+
+**Snap-point system**
+- Automatically snaps to the nearest point when released.
+- Supports option to configure curve-based and spring-based snapping.
 
 **Automatic scroll hand-off**
 - Embed scrollable content (`ListView`, `GridView`, `CustomScrollView`, etc.) inside the panel.
 - Overscroll smoothly expands or collapses the panel, similar to Google Maps or Apple Music.
 
-**Snap-point system**
-- Automatically snaps to the nearest point when released.
-- Supports option to configure curve-based and spring-based snapping.
+**Optional controller**
+
+- Panel works with or without a controller.
+- Use a controller only when you need to programmatically control the panel.
+
 
 ## Important note
 
