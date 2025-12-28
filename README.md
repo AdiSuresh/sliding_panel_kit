@@ -127,22 +127,34 @@ SlidingPanelBuilder(
   },
 ),
 ```
-Adding a handle reveals part of the panel, allowing it to be dragged and snapped at min and max extents.
+Adding a handle partially reveals the panel, providing a clear area from which dragging can begin.
 
 
 ### Step 4:
 
-Add an additional snap point:
+Enable snapping:
 
 ```dart
 SlidingPanelBuilder(
-  snapConfig: SlidingPanelSnapConfig(extents: [0.75]), // minExtent & maxExtent already included
+  snapConfig: SnapConfig(),
   ...
 )
 ```
 
 
 ### Step 5:
+
+Add an additional snap point:
+
+```dart
+SlidingPanelBuilder(
+  snapConfig: SnapConfig(extents: [0.75]),
+  ...
+)
+```
+
+
+### Step 6:
 
 Add a controller (optional):
 
@@ -171,7 +183,7 @@ SlidingPanelBuilder(
 )
 ```
 
-### Step 6:
+### Step 7:
 
 Programmatically control the panel:
 
@@ -203,7 +215,6 @@ Support for the following features is planned:
 ## Contributing
 
 If you run into issues or have ideas for improvements, please file an issue on GitHub:
-
 https://github.com/AdiSuresh/sliding_panel_kit/issues
 
 Contributions are welcome! If you’d like to improve the package, feel free to submit a pull request.
