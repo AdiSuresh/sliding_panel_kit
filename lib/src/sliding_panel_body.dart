@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 final class SlidingPanelBody extends StatelessWidget {
   final Color? color;
-  final Color? shadowColor;
+  final List<BoxShadow>? boxShadow;
   final BorderRadius borderRadius;
   final Widget child;
 
   const SlidingPanelBody({
     super.key,
     this.color,
-    this.shadowColor,
+    this.boxShadow,
     this.borderRadius = const BorderRadius.vertical(top: Radius.circular(28)),
     required this.child,
   });
@@ -18,13 +18,12 @@ final class SlidingPanelBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final color = this.color ?? colorScheme.surfaceContainerLowest;
-    final shadowColor = this.shadowColor ?? colorScheme.shadow;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: color,
         borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(color: shadowColor, blurRadius: 8, spreadRadius: -4),
+        boxShadow: boxShadow ?? [
+            BoxShadow(color: colorScheme.shadow, blurRadius: 8, spreadRadius: -4),
         ],
       ),
       child: ClipRRect(borderRadius: borderRadius, child: child),
